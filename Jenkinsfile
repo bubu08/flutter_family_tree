@@ -51,17 +51,18 @@ pipeline {
           ).trim()
           env.SDKROOT = sdkPath
 
-          // Fallback when rubyarchhdrdir points to a non-existent SDK slice
-          def archHdrDirFile = new File(rubyArchHdrDir)
-          if (!archHdrDirFile.exists()) {
+          def archHdrExists = sh(
+            script: "test -d '${rubyArchHdrDir}' && echo yes || echo no",
+            returnStdout: true
+          ).trim() == 'yes'
+          if (!archHdrExists) {
             def rubyIncludeRoot = "${sdkPath}/System/Library/Frameworks/Ruby.framework/Versions/${rubySeries}/usr/include/ruby-${rubyVersion}"
-            def availableArchDirs = sh(
-              script: "ls \"${rubyIncludeRoot}\" | grep universal-darwin || true",
+            def archCandidates = sh(
+              script: "ls '${rubyIncludeRoot}' 2>/dev/null | grep universal-darwin || true",
               returnStdout: true
             ).trim().tokenize('\n')
-            def fallbackArchDir = availableArchDirs ? availableArchDirs[0] : ''
-            if (fallbackArchDir) {
-              rubyArchHdrDir = "${rubyIncludeRoot}/${fallbackArchDir}"
+            if (archCandidates) {
+              rubyArchHdrDir = "${rubyIncludeRoot}/${archCandidates[0]}"
             }
           }
 
