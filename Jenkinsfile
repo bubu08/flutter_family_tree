@@ -149,6 +149,9 @@ pipeline {
             sh '''
               set -euo pipefail
               KEYCHAIN_PATH="$HOME/Library/Keychains/$KEYCHAIN_NAME"
+              if security list-keychains | tr -d '"' | grep -q "$KEYCHAIN_PATH"; then
+                security delete-keychain "$KEYCHAIN_PATH"
+              fi
               security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
               security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
               security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
@@ -169,9 +172,11 @@ pipeline {
       steps {
         withCredentials([
           string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET'),
-          file(credentialsId: 'play-service-account', variable: 'PLAY_JSON')
+          file(credentialsId: 'play-service-account', variable: 'PLAY_JSON'),
+          file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG')
         ]) {
           withEnv(['PLAY_SERVICE_ACCOUNT_JSON=' + PLAY_JSON]) {
+            sh "cp '${FIREBASE_ANDROID_CONFIG}' android/app/google-services.json"
             dir('android') {
               sh 'bundle exec fastlane android tests'
               sh 'bundle exec fastlane android build_release'
@@ -187,13 +192,15 @@ pipeline {
           string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET'),
           file(credentialsId: 'appstore-connect-key', variable: 'APPSTORE_KEY_FILE'),
           string(credentialsId: 'appstore-connect-key-id', variable: 'APPSTORE_KEY_ID'),
-          string(credentialsId: 'appstore-connect-issuer-id', variable: 'APPSTORE_ISSUER_ID')
+          string(credentialsId: 'appstore-connect-issuer-id', variable: 'APPSTORE_ISSUER_ID'),
+          file(credentialsId: 'firebase-ios-config', variable: 'FIREBASE_IOS_CONFIG')
         ]) {
           withEnv([
             'APPSTORE_KEY_PATH=' + APPSTORE_KEY_FILE,
             'APPSTORE_KEY_ID=' + APPSTORE_KEY_ID,
             'APPSTORE_ISSUER_ID=' + APPSTORE_ISSUER_ID
           ]) {
+            sh "cp '${FIREBASE_IOS_CONFIG}' ios/Runner/GoogleService-Info.plist"
             dir('ios') {
               sh 'bundle exec fastlane ios tests'
               sh 'bundle exec fastlane ios build_release'
