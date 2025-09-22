@@ -216,7 +216,7 @@ pipeline {
               }
 
               def signingLines = [
-                "APP_BUNDLE_IDENTIFIER = ${bundleId ?: 'com.example.familyTree'}",
+                "APP_BUNDLE_IDENTIFIER = ${bundleId ?: 'com.thomas.giatocphamdinh'}",
                 "APP_CODE_SIGN_IDENTITY = ${quoteIfNeeded(identity)}",
                 'APP_CODE_SIGN_STYLE = Manual',
                 "APP_DEVELOPMENT_TEAM = ${teamId ?: ''}",
