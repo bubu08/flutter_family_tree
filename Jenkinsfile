@@ -195,6 +195,31 @@ pipeline {
       }
     }
 
-    
+    stage('iOS Fastlane') {
+      steps {
+        withCredentials([
+          string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET'),
+          file(credentialsId: 'appstore-connect-key', variable: 'APPSTORE_KEY_FILE'),
+          string(credentialsId: 'appstore-connect-key-id', variable: 'APPSTORE_KEY_ID'),
+          string(credentialsId: 'appstore-connect-issuer-id', variable: 'APPSTORE_ISSUER_ID'),
+          file(credentialsId: 'firebase-ios-config', variable: 'FIREBASE_IOS_CONFIG')
+        ]) {
+          withEnv([
+            'APPSTORE_KEY_PATH=' + APPSTORE_KEY_FILE,
+            'APPSTORE_KEY_ID=' + APPSTORE_KEY_ID,
+            'APPSTORE_ISSUER_ID=' + APPSTORE_ISSUER_ID
+          ]) {
+            sh '''
+              set -euo pipefail
+              install -m 0644 "$FIREBASE_IOS_CONFIG" ios/Runner/GoogleService-Info.plist
+            '''
+            dir('ios') {
+              sh 'bundle exec fastlane ios tests'
+              sh 'bundle exec fastlane ios build_release'
+            }
+          }
+        }
+      }
+    }
   }
 }
