@@ -9,10 +9,7 @@ import 'package:meta/meta.dart';
 /// {@endtemplate}
 class FamilyTree extends Equatable {
   /// {@macro FamilyTree}
-  const FamilyTree({
-    @required this.id,
-    @required this.people,
-  }) : assert(id != null);
+  const FamilyTree({@required this.id, @required this.people});
 
   /// The FamilyTrees's unique identifier.
   final String id;
@@ -21,10 +18,7 @@ class FamilyTree extends Equatable {
   final List<Person> people;
 
   /// Empty person which represents an uninitialized Person.
-  static FamilyTree empty = FamilyTree(
-    id: '',
-    people: null
-  );
+  static FamilyTree empty = FamilyTree(id: '', people: null);
 
   @override
   List<Object> get props => [id, people];

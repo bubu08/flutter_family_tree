@@ -73,7 +73,7 @@ class AuthenticationRepository {
     @required String email,
     @required String password,
   }) async {
-    assert(email != null && password != null);
+    assert(password != null);
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -108,7 +108,7 @@ class AuthenticationRepository {
     @required String email,
     @required String password,
   }) async {
-    assert(email != null && password != null);
+    assert(password != null);
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
@@ -125,10 +125,7 @@ class AuthenticationRepository {
   /// Throws a [LogOutFailure] if an exception occurs.
   Future<void> logOut() async {
     try {
-      await Future.wait([
-        _firebaseAuth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      await Future.wait([_firebaseAuth.signOut(), _googleSignIn.signOut()]);
     } on Exception {
       throw LogOutFailure();
     }
@@ -137,11 +134,6 @@ class AuthenticationRepository {
 
 extension on firebase_auth.User {
   User get toUser {
-    return User(
-      id: uid,
-      email: email,
-      name: displayName,
-      photo: photoURL,
-    );
+    return User(id: uid, email: email, name: displayName, photo: photoURL);
   }
 }

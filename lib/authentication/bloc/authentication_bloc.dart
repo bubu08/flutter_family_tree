@@ -13,15 +13,11 @@ class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   AuthenticationBloc({
     @required AuthenticationRepository authenticationRepository,
-  })  : assert(authenticationRepository != null),
-        _authenticationRepository = authenticationRepository,
-        super(
-          const AuthenticationState.unknown(),
-        ) {
+  }) : assert(authenticationRepository != null),
+       _authenticationRepository = authenticationRepository,
+       super(const AuthenticationState.unknown()) {
     _userSubscription = _authenticationRepository.user.listen(
-      (user) => add(
-        AuthenticationUserChanged(user),
-      ),
+      (user) => add(AuthenticationUserChanged(user)),
     );
   }
 
@@ -41,7 +37,7 @@ class AuthenticationBloc
 
   @override
   Future<void> close() {
-    _userSubscription?.cancel();
+    _userSubscription.cancel();
     return super.close();
   }
 

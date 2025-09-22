@@ -9,24 +9,19 @@ import 'package:meta/meta.dart';
 
 class Person extends Equatable {
   /// {@macro person}
-  const Person(
-      {@required this.id,
-      @required this.familyTreeId,
-      @required this.firstNames,
-      @required this.surname,
-      @required this.birthDate,
-      @required this.deathDate,
-      @required this.description,
-      @required this.mother,
-      @required this.father,
-      @required this.spouses,
-      @required this.children})
-      : assert(id != null),
-        assert(familyTreeId != null),
-        assert(firstNames != null),
-        assert(surname != null),
-        assert(birthDate != null),
-        assert(description != null);
+  const Person({
+    @required this.id,
+    @required this.familyTreeId,
+    @required this.firstNames,
+    @required this.surname,
+    @required this.birthDate,
+    @required this.deathDate,
+    @required this.description,
+    @required this.mother,
+    @required this.father,
+    @required this.spouses,
+    @required this.children,
+  }) : assert(familyTreeId != null);
 
   /// The person's first name unique identifier.
   final String id;
@@ -78,16 +73,16 @@ class Person extends Equatable {
 
   @override
   List<Object> get props => [
-        id,
-        familyTreeId,
-        firstNames,
-        surname,
-        birthDate,
-        deathDate,
-        description,
-        mother,
-        father,
-        spouses,
-        children
-      ];
+    id,
+    familyTreeId,
+    firstNames,
+    surname,
+    birthDate,
+    deathDate,
+    description,
+    mother,
+    father,
+    spouses,
+    children,
+  ];
 }
