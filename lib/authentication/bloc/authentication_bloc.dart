@@ -16,20 +16,13 @@ class AuthenticationBloc
     _userSubscription = _authenticationRepository.user.listen(
       (user) => add(AuthenticationUserChanged(user)),
     );
+
+    on<AuthenticationUserChanged>(_onAuthenticationUserChanged);
+    on<AuthenticationLogoutRequested>(_onAuthenticationLogoutRequested);
   }
 
   final AuthenticationRepository _authenticationRepository;
   late StreamSubscription<User> _userSubscription;
-
-  Stream<AuthenticationState> mapEventToState(
-    AuthenticationEvent event,
-  ) async* {
-    if (event is AuthenticationUserChanged) {
-      yield _mapAuthenticationUserChangedToState(event);
-    } else if (event is AuthenticationLogoutRequested) {
-      _authenticationRepository.logOut();
-    }
-  }
 
   @override
   Future<void> close() {
@@ -37,11 +30,21 @@ class AuthenticationBloc
     return super.close();
   }
 
-  AuthenticationState _mapAuthenticationUserChangedToState(
+  void _onAuthenticationUserChanged(
     AuthenticationUserChanged event,
+    Emitter<AuthenticationState> emit,
   ) {
-    return event.user != User.empty
-        ? AuthenticationState.authenticated(event.user)
-        : const AuthenticationState.unauthenticated();
+    emit(
+      event.user != User.empty
+          ? AuthenticationState.authenticated(event.user)
+          : const AuthenticationState.unauthenticated(),
+    );
+  }
+
+  Future<void> _onAuthenticationLogoutRequested(
+    AuthenticationLogoutRequested event,
+    Emitter<AuthenticationState> emit,
+  ) async {
+    await _authenticationRepository.logOut();
   }
 }
