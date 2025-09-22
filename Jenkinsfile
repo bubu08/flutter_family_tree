@@ -30,13 +30,17 @@ pipeline {
             script: "ruby -e 'print RbConfig::CONFIG[\"ruby_version\"]'",
             returnStdout: true
           ).trim()
-          env.GEM_HOME = "${env.HOME}/.gem/ruby/${rubyVersion}"
+          def gemRoot = "${env.WORKSPACE}/.bundle"
+          env.GEM_HOME = "${gemRoot}/ruby/${rubyVersion}"
+          env.GEM_PATH = env.GEM_HOME
+          env.BUNDLE_PATH = env.GEM_HOME
           env.PATH = "${env.GEM_HOME}/bin:${env.PATH}"
         }
         sh '''
           set -euo pipefail
+          mkdir -p "${GEM_HOME}/bin"
           if [ ! -x "${GEM_HOME}/bin/bundle" ]; then
-            gem install --user-install bundler --no-document
+            gem install bundler --no-document --install-dir "${GEM_HOME}" --bindir "${GEM_HOME}/bin"
           fi
           "${GEM_HOME}/bin/bundle" install
         '''
