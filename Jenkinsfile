@@ -35,10 +35,10 @@ pipeline {
         }
         sh '''
           set -euo pipefail
-          if ! command -v bundle >/dev/null 2>&1; then
+          if [ ! -x "${GEM_HOME}/bin/bundle" ]; then
             gem install --user-install bundler --no-document
           fi
-          bundle install
+          "${GEM_HOME}/bin/bundle" install
         '''
       }
     }
