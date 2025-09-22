@@ -30,30 +30,52 @@ pipeline {
             script: 'ruby -rrbconfig -e "print RbConfig::CONFIG[\'ruby_version\']"',
             returnStdout: true
           ).trim()
-          def gemRoot = "${env.WORKSPACE}/.bundle"
-          env.GEM_HOME = "${gemRoot}/ruby/${rubyVersion}"
-          env.GEM_PATH = env.GEM_HOME
-          env.BUNDLE_PATH = env.GEM_HOME
-          env.PATH = "${env.GEM_HOME}/bin:${env.PATH}"
-          env.RUBY_VERSION_FULL = rubyVersion
           def rubyParts = rubyVersion.tokenize('.')
           def rubySeries = rubyParts.size() >= 2 ? "${rubyParts[0]}.${rubyParts[1]}" : rubyVersion
+          env.RUBY_VERSION_FULL = rubyVersion
           env.RUBY_VERSION_SERIES = rubySeries
-          def rubyArch = sh(
-            script: 'ruby -rrbconfig -e "print RbConfig::CONFIG[\'arch\']"',
-            returnStdout: true
-          ).trim()
-          env.RUBY_ARCH = rubyArch
+
+          def rubyConfigValue = { key ->
+            sh(
+              script: "ruby -rrbconfig -e 'print RbConfig::CONFIG[\"${key}\"]'",
+              returnStdout: true
+            ).trim()
+          }
+
+          def rubyHdrDir = rubyConfigValue('rubyhdrdir')
+          def rubyArchHdrDir = rubyConfigValue('rubyarchhdrdir')
+
           def sdkPath = sh(
             script: 'xcrun --sdk macosx --show-sdk-path',
             returnStdout: true
           ).trim()
           env.SDKROOT = sdkPath
-          def includeBase = "${sdkPath}/System/Library/Frameworks/Ruby.framework/Versions/${rubySeries}/usr/include"
-          def rubyInclude = "${includeBase}/ruby-${rubyVersion}"
-          def rubyArchInclude = "${rubyInclude}/${rubyArch}"
+
+          // Fallback when rubyarchhdrdir points to a non-existent SDK slice
+          def archHdrDirFile = new File(rubyArchHdrDir)
+          if (!archHdrDirFile.exists()) {
+            def rubyIncludeRoot = "${sdkPath}/System/Library/Frameworks/Ruby.framework/Versions/${rubySeries}/usr/include/ruby-${rubyVersion}"
+            def availableArchDirs = sh(
+              script: "ls \"${rubyIncludeRoot}\" | grep universal-darwin || true",
+              returnStdout: true
+            ).trim().tokenize('\n')
+            def fallbackArchDir = availableArchDirs ? availableArchDirs[0] : ''
+            if (fallbackArchDir) {
+              rubyArchHdrDir = "${rubyIncludeRoot}/${fallbackArchDir}"
+            }
+          }
+
+          env.RUBY_HDR_DIR = rubyHdrDir
+          env.RUBY_ARCH_HDR_DIR = rubyArchHdrDir
+
+          def gemRoot = "${env.WORKSPACE}/.bundle"
+          env.GEM_HOME = "${gemRoot}/ruby/${rubyVersion}"
+          env.GEM_PATH = env.GEM_HOME
+          env.BUNDLE_PATH = env.GEM_HOME
+          env.PATH = "${env.GEM_HOME}/bin:${env.PATH}"
+
           def existingCpath = env.CPATH?.trim()
-          env.CPATH = [includeBase, rubyInclude, rubyArchInclude, existingCpath]
+          env.CPATH = [rubyHdrDir, rubyArchHdrDir, existingCpath]
             .findAll { it && it.trim() }
             .join(':')
         }
@@ -63,8 +85,10 @@ pipeline {
           if [ ! -x "${GEM_HOME}/bin/bundle" ]; then
             gem install bundler --no-document --install-dir "${GEM_HOME}" --bindir "${GEM_HOME}/bin"
           fi
-          bundle_include_args="--with-opt-include=${SDKROOT}/System/Library/Frameworks/Ruby.framework/Versions/${RUBY_VERSION_SERIES}/usr/include:${SDKROOT}/System/Library/Frameworks/Ruby.framework/Versions/${RUBY_VERSION_SERIES}/usr/include/ruby-${RUBY_VERSION_FULL}:${SDKROOT}/System/Library/Frameworks/Ruby.framework/Versions/${RUBY_VERSION_SERIES}/usr/include/ruby-${RUBY_VERSION_FULL}/${RUBY_ARCH}"
-          "${GEM_HOME}/bin/bundle" config set --local build.nkf "${bundle_include_args}"
+          include_args="--with-opt-include=${RUBY_HDR_DIR}:${RUBY_ARCH_HDR_DIR} --with-arch-hdrdir=${RUBY_ARCH_HDR_DIR}"
+          "${GEM_HOME}/bin/bundle" config set --local build.nkf "${include_args}"
+          "${GEM_HOME}/bin/bundle" config set --local build.json "${include_args}"
+          "${GEM_HOME}/bin/bundle" config set --local build.sysrandom "${include_args}"
           "${GEM_HOME}/bin/bundle" install
         '''
       }
