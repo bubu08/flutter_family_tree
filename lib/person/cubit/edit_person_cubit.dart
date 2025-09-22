@@ -1,12 +1,19 @@
-import 'package:family_tree/family_tree/family_tree.dart';
 import 'package:bloc/bloc.dart';
+import 'package:database_repository/database_repository.dart';
 import 'package:equatable/equatable.dart';
+import 'package:family_tree/family_tree/family_tree.dart';
 import 'package:formz/formz.dart';
 
 part 'edit_person_state.dart';
 
 class EditPersonCubit extends Cubit<EditPersonState> {
-  EditPersonCubit() : super(const EditPersonState());
+  EditPersonCubit(
+    this._dataBaseRepository, {
+    this.familyTreeId = DataBaseRepository.defaultFamilyTreeId,
+  }) : super(const EditPersonState());
+
+  final DataBaseRepository _dataBaseRepository;
+  final String familyTreeId;
 
   void firstNamesChanged(String value) {
     final firstNames = FirstNames.dirty(value);
@@ -22,6 +29,10 @@ class EditPersonCubit extends Cubit<EditPersonState> {
     ));
   }
 
+  void descriptionChanged(String value) {
+    emit(state.copyWith(description: value));
+  }
+
   Future<void> savePerson() async {
     if (!Formz.validate([state.firstNames, state.lastNames])) {
       emit(state.copyWith(status: FormzSubmissionStatus.failure));
@@ -30,8 +41,12 @@ class EditPersonCubit extends Cubit<EditPersonState> {
 
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
-      // TODO: integrate with repository once backend is ready.
-      await Future<void>.delayed(const Duration(milliseconds: 300));
+      await _dataBaseRepository.savePerson(
+        familyTreeId: familyTreeId,
+        firstNames: state.firstNames.value,
+        lastNames: state.lastNames.value,
+        description: state.description,
+      );
       emit(state.copyWith(status: FormzSubmissionStatus.success));
     } catch (_) {
       emit(state.copyWith(status: FormzSubmissionStatus.failure));

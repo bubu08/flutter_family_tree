@@ -22,6 +22,7 @@ class EditPersonForm extends StatelessWidget {
             ..showSnackBar(
               const SnackBar(content: Text('Person saved.')),
             );
+          Navigator.of(context).pop(true);
         }
       },
       child: Container(
@@ -107,20 +108,7 @@ class EditPersonForm extends StatelessWidget {
               Container(
                 margin: const EdgeInsets.only(top: 15),
                 color: Colors.grey.withAlpha(40),
-                child: const Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        keyboardType: TextInputType.multiline,
-                        maxLines: 10,
-                        decoration: InputDecoration(
-                          alignLabelWithHint: true,
-                          hintText: 'Description',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: const _DescriptionInput(),
               ),
               const SizedBox(height: 24),
               _SaveButton(),
@@ -173,6 +161,30 @@ class _LastNamesInput extends StatelessWidget {
             hintText: 'Last Names',
             errorText:
                 state.lastNames.isNotValid ? 'Invalid Last Names' : null,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DescriptionInput extends StatelessWidget {
+  const _DescriptionInput();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<EditPersonCubit, EditPersonState>(
+      buildWhen: (prev, current) => prev.description != current.description,
+      builder: (context, state) {
+        return TextField(
+          key: const Key('editPersonForm_descriptionInput_textField'),
+          onChanged: context.read<EditPersonCubit>().descriptionChanged,
+          keyboardType: TextInputType.multiline,
+          maxLines: 8,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.all(12),
+            border: InputBorder.none,
+            hintText: 'Description',
           ),
         );
       },

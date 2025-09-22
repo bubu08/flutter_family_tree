@@ -1,11 +1,10 @@
+import 'package:database_repository/database_repository.dart' as db;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:family_tree/authentication/authentication.dart';
-
 import 'package:family_tree/person/person.dart' as person;
 import 'package:family_tree/profile/profile.dart' as profile;
-
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class HomePage extends StatelessWidget {
 
@@ -57,18 +56,41 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      body: Align(
-        alignment: const Alignment(0, -1 / 3),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Avatar(photo: user.photo),
-            // const SizedBox(height: 4.0),
-            // Text(user.email, style: textTheme.headline6),
-            // const SizedBox(height: 4.0),
-            // Text(user.name ?? '', style: textTheme.headline5),
-          ],
-        ),
+      body: StreamBuilder<List<db.Person>>(
+        stream: context.read<db.DataBaseRepository>().peopleStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Unable to load family tree.'));
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final people = snapshot.data ?? <db.Person>[];
+
+          if (people.isEmpty) {
+            return const Center(
+              child: Text('No relatives yet. Tap the + button to add someone.'),
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 96),
+            itemCount: people.length,
+            itemBuilder: (context, index) {
+              final person = people[index];
+              return ListTile(
+                leading: const CircleAvatar(child: Icon(Icons.person_outline)),
+                title: Text('${person.firstNames} ${person.surname}'.trim()),
+                subtitle: person.description.isNotEmpty
+                    ? Text(person.description)
+                    : null,
+              );
+            },
+            separatorBuilder: (_, __) => const Divider(height: 1),
+          );
+        },
       ),
     );
   }

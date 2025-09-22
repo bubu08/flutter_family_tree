@@ -17,6 +17,8 @@ class LoginStatusFailure implements Exception {}
 /// Repository which database requests.
 /// {@endtemplate}
 class DataBaseRepository {
+  static const String defaultFamilyTreeId = 'default_tree';
+
   /// {@macro database_repository}
   DataBaseRepository({
     firestore.FirebaseFirestore? firestoreDatabase,
@@ -33,7 +35,15 @@ class DataBaseRepository {
         _authenticationRepository = authenticationRepository;
 
   firestore.FirebaseFirestore _firestoreDatabase;
+  // ignore: unused_field
   AuthenticationRepository _authenticationRepository;
+
+  firestore.CollectionReference<Map<String, dynamic>> _treeCollection(String familyTreeId) {
+    return _firestoreDatabase
+        .collection('family_trees')
+        .doc(familyTreeId)
+        .collection('people');
+  }
 
   /// Stream of [FamilyTree] which will emit the current family tree when
   /// the database is changed.
@@ -42,12 +52,9 @@ class DataBaseRepository {
   Stream<dataBaseModels.FamilyTree> get familyTree {
     return _firestoreDatabase
         .collection('family_trees')
-        .doc('test')
+        .doc(defaultFamilyTreeId)
         .snapshots()
-        .map((query) {
-      print("QUUUUUUUUUUUUUUEEEEEEEEERRRRRRRRTTTTTTTTTTTTY");
-      return query.toFamilyTree;
-    });
+        .map((query) => query.toFamilyTree);
 
     // return _firebaseAuth.authStateChanges().map((firebaseUser) {
     //   return firebaseUser == null ? User.empty : firebaseUser.toUser;
@@ -71,12 +78,73 @@ class DataBaseRepository {
       throw InsertFailure();
     }
   }
+
+  /// Persists a person document within the provided family tree.
+  Future<void> savePerson({
+    required String familyTreeId,
+    required String firstNames,
+    required String lastNames,
+    String description = '',
+  }) async {
+    try {
+      final treeRef = _firestoreDatabase.collection('family_trees').doc(familyTreeId);
+      await treeRef.set(
+        {
+          'updatedAt': firestore.FieldValue.serverTimestamp(),
+        },
+        firestore.SetOptions(merge: true),
+      );
+
+      final people = treeRef.collection('people');
+      await people.add({
+        'firstNames': firstNames,
+        'lastNames': lastNames,
+        'description': description,
+        'createdAt': firestore.FieldValue.serverTimestamp(),
+      });
+    } on Exception {
+      throw InsertFailure();
+    }
+  }
+
+  /// Emits a stream of people for the provided family tree.
+  Stream<List<dataBaseModels.Person>> peopleStream({
+    String familyTreeId = defaultFamilyTreeId,
+  }) {
+    return _treeCollection(familyTreeId).orderBy('createdAt', descending: true).snapshots().map(
+      (snapshot) => snapshot.docs
+          .map(
+            (doc) => doc.toPerson(familyTreeId),
+          )
+          .toList(),
+    );
+  }
 }
 
-extension on firestore.DocumentSnapshot {
+extension on firestore.QueryDocumentSnapshot<Map<String, dynamic>> {
+  dataBaseModels.Person toPerson(String familyTreeId) {
+    final data = this.data();
+    final birthDate = (data['birthDate'] as firestore.Timestamp?)?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final deathDate = (data['deathDate'] as firestore.Timestamp?)?.toDate();
+
+    return dataBaseModels.Person(
+      id: id,
+      familyTreeId: familyTreeId,
+      firstNames: data['firstNames'] as String? ?? '',
+      surname: data['lastNames'] as String? ?? '',
+      birthDate: birthDate,
+      deathDate: deathDate,
+      description: data['description'] as String? ?? '',
+      mother: null,
+      father: null,
+      spouses: const [],
+      children: const [],
+    );
+  }
+}
+
+extension on firestore.DocumentSnapshot<Map<String, dynamic>> {
   dataBaseModels.FamilyTree get toFamilyTree {
-    print("==========FAMILY TREE============");
-    print(data());
     return dataBaseModels.FamilyTree.empty;
   }
 }
