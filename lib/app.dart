@@ -9,11 +9,11 @@ import 'package:family_tree/splash/splash.dart';
 import 'package:family_tree/theme.dart';
 
 class App extends StatelessWidget {
-  const App(
-      {Key? key,
-      required this.authenticationRepository,
-      required this.dataBaseRepository})
-      : super(key: key);
+  const App({
+    Key? key,
+    required this.authenticationRepository,
+    required this.dataBaseRepository,
+  }) : super(key: key);
 
   final AuthenticationRepository authenticationRepository;
   final DataBaseRepository dataBaseRepository;
@@ -33,7 +33,7 @@ class App extends StatelessWidget {
         create: (_) => AuthenticationBloc(
           authenticationRepository: authenticationRepository,
         ),
-        child: AppView(),
+        child: const AppView(),
       ),
     );
     // return RepositoryProvider.value(
@@ -49,8 +49,10 @@ class App extends StatelessWidget {
 }
 
 class AppView extends StatefulWidget {
+  const AppView({Key? key}) : super(key: key);
+
   @override
-  _AppViewState createState() => _AppViewState();
+  State<AppView> createState() => _AppViewState();
 }
 
 class _AppViewState extends State<AppView> {
@@ -63,7 +65,7 @@ class _AppViewState extends State<AppView> {
     return MaterialApp(
       theme: theme,
       navigatorKey: _navigatorKey,
-      routes: {},
+      routes: const <String, WidgetBuilder>{},
       builder: (context, child) {
         // blocListener is a Flutter widget which takes a BlocWidgetListener and an optional cubit and invokes the listener in response to state changes in the cubit.
         // should be used for functionality that needs to occur once per state change such as navigation, showing a SnackBar

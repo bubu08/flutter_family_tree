@@ -24,7 +24,7 @@ class SignUpPage extends StatelessWidget {
             context.read<AuthenticationRepository>(),
             context.read<DataBaseRepository>(),
           ),
-          child: SignUpForm(),
+          child: const SignUpForm(),
         ),
       ),
     );

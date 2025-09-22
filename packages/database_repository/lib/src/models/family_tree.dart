@@ -17,7 +17,7 @@ class FamilyTree extends Equatable {
   final List<Person> people;
 
   /// Empty person which represents an uninitialized Person.
-  static FamilyTree empty = FamilyTree(id: '', people: []);
+  static const FamilyTree empty = FamilyTree(id: '', people: <Person>[]);
 
   @override
   List<Object> get props => [id, people];

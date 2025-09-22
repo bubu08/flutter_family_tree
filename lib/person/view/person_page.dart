@@ -6,8 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'edit_person_form.dart';
 
 class PersonPage extends StatelessWidget {
+  const PersonPage({Key? key}) : super(key: key);
+
   static Route route() {
-    return MaterialPageRoute<void>(builder: (_) => PersonPage());
+    return MaterialPageRoute<void>(builder: (_) => const PersonPage());
   }
 
   @override
@@ -23,7 +25,7 @@ class PersonPage extends StatelessWidget {
           create: (context) => EditPersonCubit(
             context.read<DataBaseRepository>(),
           ),
-          child: EditPersonForm(),
+          child: const EditPersonForm(),
         ),
       ),
     );

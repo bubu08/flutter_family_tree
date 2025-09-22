@@ -2,10 +2,8 @@ import 'dart:async';
 
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
-import 'package:database_repository/src/models/models.dart' as dataBaseModels;
-import 'package:authentication_repository/src/models/models.dart' as AuthModel;
 
-import 'models/models.dart';
+import 'models/models.dart' show FamilyTree, Person;
 
 /// Thrown during the database insert process if a failure occurs.
 class InsertFailure implements Exception {}
@@ -34,9 +32,8 @@ class DataBaseRepository {
             firestoreDatabase ?? firestore.FirebaseFirestore.instance,
         _authenticationRepository = authenticationRepository;
 
-  firestore.FirebaseFirestore _firestoreDatabase;
-  // ignore: unused_field
-  AuthenticationRepository _authenticationRepository;
+  final firestore.FirebaseFirestore _firestoreDatabase;
+  final AuthenticationRepository _authenticationRepository;
 
   firestore.CollectionReference<Map<String, dynamic>> _treeCollection(String familyTreeId) {
     return _firestoreDatabase
@@ -48,8 +45,8 @@ class DataBaseRepository {
   /// Stream of [FamilyTree] which will emit the current family tree when
   /// the database is changed.
   ///
-  /// Emits [dataBaseModels.FamilyTree.empty] if the family tree does not exist.
-  Stream<dataBaseModels.FamilyTree> get familyTree {
+  /// Emits [FamilyTree.empty] if the family tree does not exist.
+  Stream<FamilyTree> get familyTree {
     return _firestoreDatabase
         .collection('family_trees')
         .doc(defaultFamilyTreeId)
@@ -64,15 +61,16 @@ class DataBaseRepository {
   /// Insets a new user into FireStore using information provided by the authentification package.
   ///
   /// Throws an [InsertFailure] if an exception occurs.
-  Future<void> insertUser(
-      {required AuthModel.User user, required String uid}) async {
-    assert(user != AuthModel.User.empty);
+  Future<void> insertUser({User? user, String? uid}) async {
+    final resolvedUser = user ?? _authenticationRepository.getCurrentUser;
+    final resolvedUid = uid ?? _authenticationRepository.getCurrentUserUid;
+    assert(resolvedUser != User.empty);
     try {
       final users = _firestoreDatabase.collection('users');
-      await users.doc(uid).set({
-        'username': user.name,
-        'email': user.email,
-        'imageUrl': user.photo,
+      await users.doc(resolvedUid).set({
+        'username': resolvedUser.name,
+        'email': resolvedUser.email,
+        'imageUrl': resolvedUser.photo,
       });
     } on Exception {
       throw InsertFailure();
@@ -108,7 +106,7 @@ class DataBaseRepository {
   }
 
   /// Emits a stream of people for the provided family tree.
-  Stream<List<dataBaseModels.Person>> peopleStream({
+  Stream<List<Person>> peopleStream({
     String familyTreeId = defaultFamilyTreeId,
   }) {
     return _treeCollection(familyTreeId).orderBy('createdAt', descending: true).snapshots().map(
@@ -122,12 +120,12 @@ class DataBaseRepository {
 }
 
 extension on firestore.QueryDocumentSnapshot<Map<String, dynamic>> {
-  dataBaseModels.Person toPerson(String familyTreeId) {
+  Person toPerson(String familyTreeId) {
     final data = this.data();
     final birthDate = (data['birthDate'] as firestore.Timestamp?)?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0);
     final deathDate = (data['deathDate'] as firestore.Timestamp?)?.toDate();
 
-    return dataBaseModels.Person(
+    return Person(
       id: id,
       familyTreeId: familyTreeId,
       firstNames: data['firstNames'] as String? ?? '',
@@ -144,7 +142,7 @@ extension on firestore.QueryDocumentSnapshot<Map<String, dynamic>> {
 }
 
 extension on firestore.DocumentSnapshot<Map<String, dynamic>> {
-  dataBaseModels.FamilyTree get toFamilyTree {
-    return dataBaseModels.FamilyTree.empty;
+  FamilyTree get toFamilyTree {
+    return FamilyTree.empty;
   }
 }

@@ -1,27 +1,30 @@
+import 'dart:developer' as developer;
+
 import 'package:bloc/bloc.dart';
 
 class SimpleBlocObserver extends BlocObserver {
   @override
   void onEvent(Bloc<dynamic, dynamic> bloc, Object? event) {
-    print(event);
+    developer.log('$event', name: bloc.runtimeType.toString());
     super.onEvent(bloc, event);
   }
 
   @override
   void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
-    print(error);
+    developer.log('$error',
+        name: bloc.runtimeType.toString(), error: error, stackTrace: stackTrace);
     super.onError(bloc, error, stackTrace);
   }
 
   @override
   void onChange(BlocBase<dynamic> bloc, Change<dynamic> change) {
-    print(change);
+    developer.log('$change', name: bloc.runtimeType.toString());
     super.onChange(bloc, change);
   }
 
   @override
   void onTransition(Bloc<dynamic, dynamic> bloc, Transition<dynamic, dynamic> transition) {
-    print(transition);
+    developer.log('$transition', name: bloc.runtimeType.toString());
     super.onTransition(bloc, transition);
   }
 }

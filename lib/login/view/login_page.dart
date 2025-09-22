@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:family_tree/login/login.dart';
 
 class LoginPage extends StatelessWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
   static Route route() {
-    return MaterialPageRoute<void>(builder: (_) => LoginPage());
+    return MaterialPageRoute<void>(builder: (_) => const LoginPage());
   }
 
   @override
@@ -15,15 +17,9 @@ class LoginPage extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: BlocProvider(
           create: (_) => LoginCubit(context.read<AuthenticationRepository>()),
-          child: Align(
-            alignment: const Alignment(0, 0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _LoginPageHeader(),
-                LoginForm(),
-              ],
-            ),
+          child: const Align(
+            alignment: Alignment(0, 0),
+            child: _LoginPageBody(),
           ),
         ),
       ),
@@ -32,21 +28,41 @@ class LoginPage extends StatelessWidget {
 }
 
 class _LoginPageHeader extends StatelessWidget {
+  const _LoginPageHeader({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 20),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        Container(child: Image.asset('assets/bloc_logo_small.png', height: 60)),
-        const Text(
-          'Family Tree',
-          style: TextStyle(
-            fontFamily: 'HangingTree',
-            fontSize: 60,
-            color: Colors.brown,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Image.asset('assets/bloc_logo_small.png', height: 60),
+          const Text(
+            'Family Tree',
+            style: TextStyle(
+              fontFamily: 'HangingTree',
+              fontSize: 60,
+              color: Colors.brown,
+            ),
           ),
-        )
-      ]),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoginPageBody extends StatelessWidget {
+  const _LoginPageBody({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        _LoginPageHeader(),
+        LoginForm(),
+      ],
     );
   }
 }

@@ -30,6 +30,7 @@ dependencies:
   meta: ^1.9.1
   google_fonts: ^6.1.0
   formz: ^0.7.0
+  firebase_core: ^2.27.0
   # Widgets
   flutter_speed_dial: ^7.0.0
   # Repositories

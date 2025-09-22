@@ -6,6 +6,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:formz/formz.dart';
 
 class LoginForm extends StatelessWidget {
+  const LoginForm({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<LoginCubit, LoginState>(
@@ -18,31 +20,42 @@ class LoginForm extends StatelessWidget {
             );
         }
       },
-      child: Align(
-        alignment: const Alignment(0, 0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 16.0),
-              _EmailInput(),
-              const SizedBox(height: 8.0),
-              _PasswordInput(),
-              const SizedBox(height: 8.0),
-              _LoginButton(),
-              const SizedBox(height: 8.0),
-              _GoogleLoginButton(),
-              const SizedBox(height: 4.0),
-              _SignUpButton(),
-            ],
-          ),
-        ),
+      child: const Align(
+        alignment: Alignment(0, 0),
+        child: _LoginFormBody(),
+      ),
+    );
+  }
+}
+
+class _LoginFormBody extends StatelessWidget {
+  const _LoginFormBody({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          SizedBox(height: 16.0),
+          _EmailInput(),
+          SizedBox(height: 8.0),
+          _PasswordInput(),
+          SizedBox(height: 8.0),
+          _LoginButton(),
+          SizedBox(height: 8.0),
+          _GoogleLoginButton(),
+          SizedBox(height: 4.0),
+          _SignUpButton(),
+        ],
       ),
     );
   }
 }
 
 class _EmailInput extends StatelessWidget {
+  const _EmailInput({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LoginCubit, LoginState>(
@@ -53,7 +66,7 @@ class _EmailInput extends StatelessWidget {
           onChanged: (email) => context.read<LoginCubit>().emailChanged(email),
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
-            prefixIcon: Icon(Icons.email_outlined),
+            prefixIcon: const Icon(Icons.email_outlined),
             labelText: 'email',
             helperText: '',
             errorText: state.email.isNotValid ? 'invalid email' : null,
@@ -65,6 +78,8 @@ class _EmailInput extends StatelessWidget {
 }
 
 class _PasswordInput extends StatelessWidget {
+  const _PasswordInput({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LoginCubit, LoginState>(
@@ -76,7 +91,7 @@ class _PasswordInput extends StatelessWidget {
               context.read<LoginCubit>().passwordChanged(password),
           obscureText: true,
           decoration: InputDecoration(
-            prefixIcon: Icon(Icons.lock_outline),
+            prefixIcon: const Icon(Icons.lock_outline),
             labelText: 'password',
             helperText: '',
             errorText: state.password.isNotValid ? 'invalid password' : null,
@@ -88,6 +103,8 @@ class _PasswordInput extends StatelessWidget {
 }
 
 class _LoginButton extends StatelessWidget {
+  const _LoginButton({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LoginCubit, LoginState>(
@@ -100,7 +117,6 @@ class _LoginButton extends StatelessWidget {
             ? const CircularProgressIndicator()
             : ElevatedButton(
                 key: const Key('loginForm_continue_raisedButton'),
-                child: const Text('LOGIN'),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0),
@@ -110,6 +126,7 @@ class _LoginButton extends StatelessWidget {
                 onPressed: Formz.validate([state.email, state.password])
                     ? () => context.read<LoginCubit>().logInWithCredentials()
                     : null,
+                child: const Text('LOGIN'),
               );
       },
     );
@@ -117,6 +134,8 @@ class _LoginButton extends StatelessWidget {
 }
 
 class _GoogleLoginButton extends StatelessWidget {
+  const _GoogleLoginButton({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -138,16 +157,18 @@ class _GoogleLoginButton extends StatelessWidget {
 }
 
 class _SignUpButton extends StatelessWidget {
+  const _SignUpButton({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextButton(
       key: const Key('loginForm_createAccount_flatButton'),
+      onPressed: () => Navigator.of(context).push<void>(SignUpPage.route()),
       child: Text(
         'CREATE ACCOUNT',
         style: TextStyle(color: theme.colorScheme.secondary),
       ),
-      onPressed: () => Navigator.of(context).push<void>(SignUpPage.route()),
     );
   }
 }

@@ -7,9 +7,10 @@ import 'package:family_tree/person/person.dart' as person;
 import 'package:family_tree/profile/profile.dart' as profile;
 
 class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   static Route route() {
-    return MaterialPageRoute<void>(builder: (_) => HomePage());
+    return MaterialPageRoute<void>(builder: (_) => const HomePage());
   }
 
   @override
@@ -40,21 +41,21 @@ class HomePage extends StatelessWidget {
         animationDuration: const Duration(milliseconds: 300),
         animationCurve: Curves.linear,
         backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(Icons.add),
         children: [
           SpeedDialChild(
-            child: const Icon(Icons.share),
             label: 'Share Tree',
             onTap: () {},
+            child: const Icon(Icons.share),
           ),
           SpeedDialChild(
-            child: const Icon(Icons.person_add),
             label: 'Add Person',
             onTap: () {
               Navigator.of(context).push(person.PersonPage.route());
             },
+            child: const Icon(Icons.person_add),
           ),
         ],
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<List<db.Person>>(
         stream: context.read<db.DataBaseRepository>().peopleStream(),

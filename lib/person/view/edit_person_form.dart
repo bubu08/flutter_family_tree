@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 
 class EditPersonForm extends StatelessWidget {
+  const EditPersonForm({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<EditPersonCubit, EditPersonState>(
@@ -50,9 +52,9 @@ class EditPersonForm extends StatelessWidget {
                       child: Container(
                         color: Colors.grey.withAlpha(40),
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Column(
+                        child: const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                          children: <Widget>[
                             _FirstNamesInput(),
                             _LastNamesInput(),
                           ],
@@ -111,7 +113,7 @@ class EditPersonForm extends StatelessWidget {
                 child: const _DescriptionInput(),
               ),
               const SizedBox(height: 24),
-              _SaveButton(),
+              const _SaveButton(),
             ],
           ),
         ),
@@ -121,6 +123,8 @@ class EditPersonForm extends StatelessWidget {
 }
 
 class _FirstNamesInput extends StatelessWidget {
+  const _FirstNamesInput({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EditPersonCubit, EditPersonState>(
@@ -145,6 +149,8 @@ class _FirstNamesInput extends StatelessWidget {
 }
 
 class _LastNamesInput extends StatelessWidget {
+  const _LastNamesInput({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EditPersonCubit, EditPersonState>(
@@ -169,7 +175,7 @@ class _LastNamesInput extends StatelessWidget {
 }
 
 class _DescriptionInput extends StatelessWidget {
-  const _DescriptionInput();
+  const _DescriptionInput({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -181,8 +187,8 @@ class _DescriptionInput extends StatelessWidget {
           onChanged: context.read<EditPersonCubit>().descriptionChanged,
           keyboardType: TextInputType.multiline,
           maxLines: 8,
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.all(12),
+          decoration: const InputDecoration(
+            contentPadding: EdgeInsets.all(12),
             border: InputBorder.none,
             hintText: 'Description',
           ),
@@ -193,6 +199,8 @@ class _DescriptionInput extends StatelessWidget {
 }
 
 class _SaveButton extends StatelessWidget {
+  const _SaveButton({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EditPersonCubit, EditPersonState>(

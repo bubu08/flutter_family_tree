@@ -31,9 +31,9 @@ void main() async {
     } catch (e) {
       // Firebase might already be initialized
       if (e.toString().contains('already exists')) {
-        print('Firebase already initialized');
+        debugPrint('Firebase already initialized');
       } else {
-        print('Firebase initialization error: $e');
+        debugPrint('Firebase initialization error: $e');
       }
     }
   } else {

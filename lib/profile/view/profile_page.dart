@@ -4,8 +4,10 @@ import 'package:family_tree/authentication/authentication.dart';
 import 'package:family_tree/profile/profile.dart';
 
 class ProfilePage extends StatelessWidget {
+  const ProfilePage({Key? key}) : super(key: key);
+
   static Route route() {
-    return MaterialPageRoute<void>(builder: (_) => ProfilePage());
+    return MaterialPageRoute<void>(builder: (_) => const ProfilePage());
   }
 
   @override

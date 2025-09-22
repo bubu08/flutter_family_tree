@@ -66,8 +66,8 @@ class Person extends Equatable {
     description: '',
     mother: null,
     father: null,
-    spouses: [],
-    children: [],
+    spouses: const <Person>[],
+    children: const <Person>[],
   );
 
   @override

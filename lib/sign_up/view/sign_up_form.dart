@@ -4,6 +4,8 @@ import 'package:family_tree/sign_up/sign_up.dart';
 import 'package:formz/formz.dart';
 
 class SignUpForm extends StatelessWidget {
+  const SignUpForm({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     // blocListener is a Flutter widget which takes a BlocWidgetListener and an optional cubit and invokes the listener in response to state changes in the cubit.
@@ -19,28 +21,39 @@ class SignUpForm extends StatelessWidget {
             );
         }
       },
-      child: Align(
-        alignment: const Alignment(0, 0 / 3),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _EmailInput(),
-              const SizedBox(height: 8.0),
-              _PasswordInput(),
-              const SizedBox(height: 8.0),
-              _ConfirmPasswordInput(),
-              const SizedBox(height: 8.0),
-              _SignUpButton(),
-            ],
-          ),
-        ),
+      child: const Align(
+        alignment: Alignment(0, 0 / 3),
+        child: _SignUpFormBody(),
+      ),
+    );
+  }
+}
+
+class _SignUpFormBody extends StatelessWidget {
+  const _SignUpFormBody({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _EmailInput(),
+          SizedBox(height: 8.0),
+          _PasswordInput(),
+          SizedBox(height: 8.0),
+          _ConfirmPasswordInput(),
+          SizedBox(height: 8.0),
+          _SignUpButton(),
+        ],
       ),
     );
   }
 }
 
 class _EmailInput extends StatelessWidget {
+  const _EmailInput({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     // handles building the widget in response to new states
@@ -53,7 +66,7 @@ class _EmailInput extends StatelessWidget {
           onChanged: (email) => context.read<SignUpCubit>().emailChanged(email),
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
-            prefixIcon: Icon(Icons.email_outlined),
+            prefixIcon: const Icon(Icons.email_outlined),
             labelText: 'email',
             helperText: '',
             errorText: state.email.isNotValid ? 'invalid email' : null,
@@ -65,6 +78,8 @@ class _EmailInput extends StatelessWidget {
 }
 
 class _PasswordInput extends StatelessWidget {
+  const _PasswordInput({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SignUpCubit, SignUpState>(
@@ -76,15 +91,15 @@ class _PasswordInput extends StatelessWidget {
               context.read<SignUpCubit>().passwordChanged(password),
           obscureText: true,
           decoration: InputDecoration(
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               Icons.lock_outline,
               // color: !state.password.isNotValid
-            //     ? Theme.of(context).errorColor
-            //     : Colors.green,
-          ),
-          labelText: 'password',
-          helperText: '',
-          errorText: state.password.isNotValid ? 'invalid password' : null,
+              //     ? Theme.of(context).errorColor
+              //     : Colors.green,
+            ),
+            labelText: 'password',
+            helperText: '',
+            errorText: state.password.isNotValid ? 'invalid password' : null,
           ),
         );
       },
@@ -93,6 +108,8 @@ class _PasswordInput extends StatelessWidget {
 }
 
 class _ConfirmPasswordInput extends StatelessWidget {
+  const _ConfirmPasswordInput({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SignUpCubit, SignUpState>(
@@ -107,7 +124,7 @@ class _ConfirmPasswordInput extends StatelessWidget {
               .confirmedPasswordChanged(confirmPassword),
           obscureText: true,
           decoration: InputDecoration(
-            prefixIcon: Icon(Icons.lock_outline),
+            prefixIcon: const Icon(Icons.lock_outline),
             labelText: 'confirm password',
             helperText: '',
             errorText: state.confirmedPassword.isNotValid
@@ -121,6 +138,8 @@ class _ConfirmPasswordInput extends StatelessWidget {
 }
 
 class _SignUpButton extends StatelessWidget {
+  const _SignUpButton({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SignUpCubit, SignUpState>(
