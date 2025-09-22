@@ -4,8 +4,6 @@ import 'package:database_repository/database_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:family_tree/authentication/authentication.dart';
-import 'package:family_tree/family_tree/models/first_names.dart';
-import 'package:family_tree/family_tree/models/last_names.dart';
 import 'package:formz/formz.dart';
 
 part 'sign_up_state.dart';
@@ -52,8 +50,6 @@ class SignUpCubit extends Cubit<SignUpState> {
       state.email,
       state.password,
       state.confirmedPassword,
-      state.firstNames,
-      state.lastNames,
     ])) return;
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {

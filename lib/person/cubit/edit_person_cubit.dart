@@ -16,15 +16,25 @@ class EditPersonCubit extends Cubit<EditPersonState> {
   }
 
   void lastNamesChanged(String value) {
-    print("test");
     final lastNames = LastNames.dirty(value);
-    print(
-      Formz.validate([
-        lastNames,
-      ]),
-    );
     emit(state.copyWith(
       lastNames: lastNames,
     ));
+  }
+
+  Future<void> savePerson() async {
+    if (!Formz.validate([state.firstNames, state.lastNames])) {
+      emit(state.copyWith(status: FormzSubmissionStatus.failure));
+      return;
+    }
+
+    emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
+    try {
+      // TODO: integrate with repository once backend is ready.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      emit(state.copyWith(status: FormzSubmissionStatus.success));
+    } catch (_) {
+      emit(state.copyWith(status: FormzSubmissionStatus.failure));
+    }
   }
 }

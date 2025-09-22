@@ -124,7 +124,11 @@ class _SignUpButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SignUpCubit, SignUpState>(
-      buildWhen: (previous, current) => previous.status != current.status,
+      buildWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.email != current.email ||
+          previous.password != current.password ||
+          previous.confirmedPassword != current.confirmedPassword,
       builder: (context, state) {
         return state.status == FormzSubmissionStatus.inProgress
             ? const CircularProgressIndicator()
@@ -142,8 +146,6 @@ class _SignUpButton extends StatelessWidget {
                   state.email,
                   state.password,
                   state.confirmedPassword,
-                  state.firstNames,
-                  state.lastNames,
                 ])
                     ? () => context.read<SignUpCubit>().signUpFormSubmitted()
                     : null,

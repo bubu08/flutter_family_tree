@@ -42,3 +42,7 @@ app.*.map.json
 
 # Secret Information
 android\app\google-services.json
+android/app/google-services.json
+
+
+ios/Runner/GoogleService-Info.plist
