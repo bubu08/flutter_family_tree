@@ -4,20 +4,20 @@ class EditPersonState extends Equatable {
   const EditPersonState({
     this.firstNames = const FirstNames.pure(),
     this.lastNames = const LastNames.pure(),
-    this.status = FormzStatus.pure,
+    this.status = FormzSubmissionStatus.initial,
   });
 
   final FirstNames firstNames;
   final LastNames lastNames;
-  final FormzStatus status;
+  final FormzSubmissionStatus status;
 
   @override
-  List<Object> get props => [firstNames, lastNames];
+  List<Object> get props => [firstNames, lastNames, status];
 
   EditPersonState copyWith({
-    FirstNames firstNames,
-    LastNames lastNames,
-    FormzStatus status,
+    FirstNames? firstNames,
+    LastNames? lastNames,
+    FormzSubmissionStatus? status,
   }) {
     return EditPersonState(
       firstNames: firstNames ?? this.firstNames,

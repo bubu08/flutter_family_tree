@@ -7,24 +7,28 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:database_repository/database_repository.dart';
 
-import 'package:family_tree/main.dart';
+import 'package:family_tree/app.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('App widget test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(App());
+    final authenticationRepository = AuthenticationRepository();
+    final dataBaseRepository = DataBaseRepository(
+      authenticationRepository: authenticationRepository,
+    );
+    
+    await tester.pumpWidget(App(
+      authenticationRepository: authenticationRepository,
+      dataBaseRepository: dataBaseRepository,
+    ));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the app loads without crashing
+    await tester.pumpAndSettle();
+    
+    // This is a basic smoke test to ensure the app can be instantiated
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

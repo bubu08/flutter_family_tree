@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:family_tree/authentication/authentication.dart';
-import 'package:family_tree/home/home.dart' as home;
+
 import 'package:family_tree/person/person.dart' as person;
 import 'package:family_tree/profile/profile.dart' as profile;
 
-import 'package:fab_circular_menu/fab_circular_menu.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class HomePage extends StatelessWidget {
-  final GlobalKey<FabCircularMenuState> fabKey = GlobalKey();
 
   static Route route() {
     return MaterialPageRoute<void>(builder: (_) => HomePage());
@@ -38,29 +37,21 @@ class HomePage extends StatelessWidget {
           )
         ],
       ),
-      floatingActionButton: FabCircularMenu(
-        key: fabKey,
+      floatingActionButton: SpeedDial(
         animationDuration: const Duration(milliseconds: 300),
         animationCurve: Curves.linear,
-        ringColor: Theme.of(context).primaryColor.withAlpha(90),
-        ringDiameter: 350,
-        ringWidth: 100,
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(Icons.add),
         children: [
-          home.FabCircularMenuButtom(
-            icon: Icons.share,
-            label: 'Share\nTree',
+          SpeedDialChild(
+            child: const Icon(Icons.share),
+            label: 'Share Tree',
             onTap: () {},
           ),
-          home.FabCircularMenuButtom(
-            icon: Icons.share,
-            label: 'Share\nTree',
-            onTap: () {},
-          ),
-          home.FabCircularMenuButtom(
-            icon: Icons.person_add,
-            label: 'Add\nPerson',
+          SpeedDialChild(
+            child: const Icon(Icons.person_add),
+            label: 'Add Person',
             onTap: () {
-              fabKey.currentState.close();
               Navigator.of(context).push(person.PersonPage.route());
             },
           ),

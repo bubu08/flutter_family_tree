@@ -23,9 +23,9 @@ class ProfilePage extends StatelessWidget {
           children: <Widget>[
             Avatar(photo: user.photo),
             const SizedBox(height: 4.0),
-            Text(user.email, style: textTheme.headline6),
+            Text(user.email, style: textTheme.headlineSmall),
             const SizedBox(height: 4.0),
-            Text(user.name ?? '', style: textTheme.headline5),
+            Text(user.name ?? '', style: textTheme.headlineMedium),
           ],
         ),
       ),

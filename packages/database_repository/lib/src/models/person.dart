@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 
 /// {@template user}
 /// Person model
@@ -10,18 +9,18 @@ import 'package:meta/meta.dart';
 class Person extends Equatable {
   /// {@macro person}
   const Person({
-    @required this.id,
-    @required this.familyTreeId,
-    @required this.firstNames,
-    @required this.surname,
-    @required this.birthDate,
-    @required this.deathDate,
-    @required this.description,
-    @required this.mother,
-    @required this.father,
-    @required this.spouses,
-    @required this.children,
-  }) : assert(familyTreeId != null);
+    required this.id,
+    required this.familyTreeId,
+    required this.firstNames,
+    required this.surname,
+    required this.birthDate,
+    this.deathDate,
+    required this.description,
+    this.mother,
+    this.father,
+    required this.spouses,
+    required this.children,
+  });
 
   /// The person's first name unique identifier.
   final String id;
@@ -39,16 +38,16 @@ class Person extends Equatable {
   final DateTime birthDate;
 
   /// The person's date of death.
-  final DateTime deathDate;
+  final DateTime? deathDate;
 
   /// General description of who the person is, what they achieved during their lifetime, where they lived, how they died, etc.
   final String description;
 
   /// Biological mother of the person.
-  final Person mother;
+  final Person? mother;
 
   /// Biological father of the person.
-  final Person father;
+  final Person? father;
 
   /// List of spouses to whom the person was commited.
   final List<Person> spouses;
@@ -67,12 +66,12 @@ class Person extends Equatable {
     description: '',
     mother: null,
     father: null,
-    spouses: null,
-    children: null,
+    spouses: [],
+    children: [],
   );
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
     id,
     familyTreeId,
     firstNames,

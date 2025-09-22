@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:meta/meta.dart';
 
 import 'models/models.dart';
 
@@ -24,29 +23,25 @@ class LogOutFailure implements Exception {}
 class AuthenticationRepository {
   /// {@macro authentication_repository}
   AuthenticationRepository({
-    firebase_auth.FirebaseAuth firebaseAuth,
-    GoogleSignIn googleSignIn,
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    GoogleSignIn? googleSignIn,
   }) {
     _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance;
     _googleSignIn = googleSignIn ?? GoogleSignIn.standard();
-    _currentUser = null;
+    _currentUser = User.empty;
+    _currentUserUid = '';
 
     _firebaseAuth.authStateChanges().listen((firebaseUser) {
-      _currentUser = firebaseUser.toUser;
-      _currentUserUid = firebaseUser.uid;
+      _currentUser = firebaseUser?.toUser ?? User.empty;
+      _currentUserUid = firebaseUser?.uid ?? '';
     });
   }
-  // : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
-  //       _googleSignIn = googleSignIn ?? GoogleSignIn.standard(),
-  //       currentUser = null,
-  //       _currentUserSubscription = _firebaseAuth.authStateChanges().listen();
 
-  firebase_auth.FirebaseAuth _firebaseAuth;
-  GoogleSignIn _googleSignIn;
+  late firebase_auth.FirebaseAuth _firebaseAuth;
+  late GoogleSignIn _googleSignIn;
 
-  // StreamSubscription<firebase_auth.User> _currentUserSubscription;
-  User _currentUser;
-  String _currentUserUid;
+  late User _currentUser;
+  late String _currentUserUid;
 
   /// Stream of [User] which will emit the current user when
   /// the authentication state changes.
@@ -54,7 +49,7 @@ class AuthenticationRepository {
   /// Emits [User.empty] if the user is not authenticated.
   Stream<User> get user {
     return _firebaseAuth.authStateChanges().map((firebaseUser) {
-      return firebaseUser == null ? User.empty : firebaseUser.toUser;
+      return firebaseUser?.toUser ?? User.empty;
     });
   }
 
@@ -70,10 +65,9 @@ class AuthenticationRepository {
   ///
   /// Throws a [SignUpFailure] if an exception occurs.
   Future<void> signUp({
-    @required String email,
-    @required String password,
+    required String email,
+    required String password,
   }) async {
-    assert(password != null);
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -90,6 +84,7 @@ class AuthenticationRepository {
   Future<void> logInWithGoogle() async {
     try {
       final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) throw LogInWithGoogleFailure();
       final googleAuth = await googleUser.authentication;
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -105,10 +100,9 @@ class AuthenticationRepository {
   ///
   /// Throws a [LogInWithEmailAndPasswordFailure] if an exception occurs.
   Future<void> logInWithEmailAndPassword({
-    @required String email,
-    @required String password,
+    required String email,
+    required String password,
   }) async {
-    assert(password != null);
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
@@ -134,6 +128,11 @@ class AuthenticationRepository {
 
 extension on firebase_auth.User {
   User get toUser {
-    return User(id: uid, email: email, name: displayName, photo: photoURL);
+    return User(
+      id: uid, 
+      email: email ?? '', 
+      name: displayName ?? '', 
+      photo: photoURL ?? ''
+    );
   }
 }

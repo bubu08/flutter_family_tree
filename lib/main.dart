@@ -10,7 +10,35 @@ import 'package:family_tree/simple_bloc_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  
+  // Initialize Firebase with proper web configuration
+  if (kIsWeb) {
+    // For web, Firebase is already initialized in index.html
+    // We just need to ensure it's ready
+    try {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: "demo-api-key",
+          authDomain: "demo-project.firebaseapp.com",
+          projectId: "demo-project",
+          storageBucket: "demo-project.appspot.com",
+          messagingSenderId: "123456789",
+          appId: "1:123456789:web:abcdef123456",
+        ),
+      );
+    } catch (e) {
+      // Firebase might already be initialized
+      if (e.toString().contains('already exists')) {
+        print('Firebase already initialized');
+      } else {
+        print('Firebase initialization error: $e');
+      }
+    }
+  } else {
+    // For mobile platforms
+    await Firebase.initializeApp();
+  }
+  
   EquatableConfig.stringify = kDebugMode;
   Bloc.observer = SimpleBlocObserver();
   final authenticationRepository = AuthenticationRepository();

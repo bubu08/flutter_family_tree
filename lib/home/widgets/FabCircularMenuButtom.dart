@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 class FabCircularMenuButtom extends StatelessWidget {
   final IconData icon;
   final String label;
-  final Function onTap;
+  final VoidCallback onTap;
 
-  FabCircularMenuButtom({
-    @required this.icon,
-    @required this.label,
-    @required this.onTap,
-  });
+  const FabCircularMenuButtom({
+    Key? key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ class LastNames extends FormzInput<String, LastNamesValidationError> {
   // );
 
   @override
-  LastNamesValidationError validator(String value) {
+  LastNamesValidationError? validator(String value) {
     return (!(value.isEmpty)) ? null : LastNamesValidationError.invalid;
   }
 }

@@ -4,15 +4,15 @@ import 'package:database_repository/database_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:family_tree/authentication/authentication.dart';
+import 'package:family_tree/family_tree/models/first_names.dart';
+import 'package:family_tree/family_tree/models/last_names.dart';
 import 'package:formz/formz.dart';
 
 part 'sign_up_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
   SignUpCubit(this._authenticationRepository, this._dataBaseRepository)
-      : assert(_authenticationRepository != null),
-        assert(_dataBaseRepository != null),
-        super(const SignUpState());
+      : super(const SignUpState());
 
   final AuthenticationRepository _authenticationRepository;
   final DataBaseRepository _dataBaseRepository;
@@ -21,11 +21,6 @@ class SignUpCubit extends Cubit<SignUpState> {
     final email = Email.dirty(value);
     emit(state.copyWith(
       email: email,
-      status: Formz.validate([
-        email,
-        state.password,
-        state.confirmedPassword,
-      ]),
     ));
   }
 
@@ -36,13 +31,9 @@ class SignUpCubit extends Cubit<SignUpState> {
       value: state.confirmedPassword.value,
     );
     emit(state.copyWith(
+      email: state.email,
       password: password,
       confirmedPassword: confirmedPassword,
-      status: Formz.validate([
-        state.email,
-        password,
-        state.confirmedPassword,
-      ]),
     ));
   }
 
@@ -53,17 +44,18 @@ class SignUpCubit extends Cubit<SignUpState> {
     );
     emit(state.copyWith(
       confirmedPassword: confirmedPassword,
-      status: Formz.validate([
-        state.email,
-        state.password,
-        confirmedPassword,
-      ]),
     ));
   }
 
   Future<void> signUpFormSubmitted() async {
-    if (!state.status.isValidated) return;
-    emit(state.copyWith(status: FormzStatus.submissionInProgress));
+    if (!Formz.validate([
+      state.email,
+      state.password,
+      state.confirmedPassword,
+      state.firstNames,
+      state.lastNames,
+    ])) return;
+    emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
       await _authenticationRepository.signUp(
         email: state.email.value,
@@ -72,9 +64,9 @@ class SignUpCubit extends Cubit<SignUpState> {
       final user = _authenticationRepository.getCurrentUser;
       final userUid = _authenticationRepository.getCurrentUserUid;
       await _dataBaseRepository.insertUser(user: user, uid: userUid);
-      emit(state.copyWith(status: FormzStatus.submissionSuccess));
+      emit(state.copyWith(status: FormzSubmissionStatus.success));
     } on Exception {
-      emit(state.copyWith(status: FormzStatus.submissionFailure));
+      emit(state.copyWith(status: FormzSubmissionStatus.failure));
     }
   }
 }

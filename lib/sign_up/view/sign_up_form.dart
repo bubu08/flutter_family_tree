@@ -11,8 +11,8 @@ class SignUpForm extends StatelessWidget {
     // is a void function
     return BlocListener<SignUpCubit, SignUpState>(
       listener: (context, state) {
-        if (state.status.isSubmissionFailure) {
-          Scaffold.of(context)
+        if (state.status == FormzSubmissionStatus.failure) {
+          ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
               const SnackBar(content: Text('Sign Up Failure')),
@@ -56,7 +56,7 @@ class _EmailInput extends StatelessWidget {
             prefixIcon: Icon(Icons.email_outlined),
             labelText: 'email',
             helperText: '',
-            errorText: state.email.invalid ? 'invalid email' : null,
+            errorText: state.email.isNotValid ? 'invalid email' : null,
           ),
         );
       },
@@ -78,13 +78,13 @@ class _PasswordInput extends StatelessWidget {
           decoration: InputDecoration(
             prefixIcon: Icon(
               Icons.lock_outline,
-              // color: !state.password.invalid
-              //     ? Theme.of(context).errorColor
-              //     : Colors.green,
-            ),
-            labelText: 'password',
-            helperText: '',
-            errorText: state.password.invalid ? 'invalid password' : null,
+              // color: !state.password.isNotValid
+            //     ? Theme.of(context).errorColor
+            //     : Colors.green,
+          ),
+          labelText: 'password',
+          helperText: '',
+          errorText: state.password.isNotValid ? 'invalid password' : null,
           ),
         );
       },
@@ -110,7 +110,7 @@ class _ConfirmPasswordInput extends StatelessWidget {
             prefixIcon: Icon(Icons.lock_outline),
             labelText: 'confirm password',
             helperText: '',
-            errorText: state.confirmedPassword.invalid
+            errorText: state.confirmedPassword.isNotValid
                 ? 'passwords do not match'
                 : null,
           ),
@@ -126,17 +126,25 @@ class _SignUpButton extends StatelessWidget {
     return BlocBuilder<SignUpCubit, SignUpState>(
       buildWhen: (previous, current) => previous.status != current.status,
       builder: (context, state) {
-        return state.status.isSubmissionInProgress
+        return state.status == FormzSubmissionStatus.inProgress
             ? const CircularProgressIndicator()
-            : RaisedButton.icon(
-                icon: Icon(Icons.check_box_outlined),
+            : ElevatedButton.icon(
+                icon: const Icon(Icons.check_box_outlined),
                 key: const Key('signUpForm_continue_raisedButton'),
                 label: const Text('SIGN UP'),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  backgroundColor: Colors.orangeAccent,
                 ),
-                color: Colors.orangeAccent,
-                onPressed: state.status.isValidated
+                onPressed: Formz.validate([
+                  state.email,
+                  state.password,
+                  state.confirmedPassword,
+                  state.firstNames,
+                  state.lastNames,
+                ])
                     ? () => context.read<SignUpCubit>().signUpFormSubmitted()
                     : null,
               );

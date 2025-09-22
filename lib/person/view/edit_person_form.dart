@@ -126,7 +126,7 @@ class _FirstNamesInput extends StatelessWidget {
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
             hintText: 'First Names',
-            errorText: state.firstNames.invalid ? 'Invalid First Names' : null,
+            errorText: state.firstNames.isNotValid ? 'Invalid First Names' : null,
           ),
         );
       },
@@ -150,7 +150,7 @@ class _LastNamesInput extends StatelessWidget {
             focusedBorder: InputBorder.none,
             hintText: 'Last Names',
             labelStyle: TextStyle(color: Colors.red),
-            errorText: state.lastNames.invalid ? 'Invalid Last Names' : null,
+            errorText: state.lastNames.isNotValid ? 'Invalid Last Names' : null,
           ),
         );
       },

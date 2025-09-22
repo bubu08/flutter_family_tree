@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:authentication_repository/authentication_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:database_repository/src/models/models.dart' as dataBaseModels;
 import 'package:authentication_repository/src/models/models.dart' as AuthModel;
-import 'package:meta/meta.dart';
 
 import 'models/models.dart';
 
@@ -20,8 +19,8 @@ class LoginStatusFailure implements Exception {}
 class DataBaseRepository {
   /// {@macro database_repository}
   DataBaseRepository({
-    firestore.FirebaseFirestore firestoreDatabase,
-    @required AuthenticationRepository authenticationRepository,
+    firestore.FirebaseFirestore? firestoreDatabase,
+    required AuthenticationRepository authenticationRepository,
   })  
   // {
   //   this._authenticationRepository = authenticationRepository;
@@ -47,9 +46,7 @@ class DataBaseRepository {
         .snapshots()
         .map((query) {
       print("QUUUUUUUUUUUUUUEEEEEEEEERRRRRRRRTTTTTTTTTTTTY");
-      return query == null
-          ? dataBaseModels.FamilyTree(id: '', people: null)
-          : query.toFamilyTree;
+      return query.toFamilyTree;
     });
 
     // return _firebaseAuth.authStateChanges().map((firebaseUser) {
@@ -61,9 +58,8 @@ class DataBaseRepository {
   ///
   /// Throws an [InsertFailure] if an exception occurs.
   Future<void> insertUser(
-      {@required AuthModel.User user, @required String uid}) async {
+      {required AuthModel.User user, required String uid}) async {
     assert(user != AuthModel.User.empty);
-    assert(user != null);
     try {
       final users = _firestoreDatabase.collection('users');
       await users.doc(uid).set({

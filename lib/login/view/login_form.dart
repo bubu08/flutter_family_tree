@@ -10,8 +10,8 @@ class LoginForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<LoginCubit, LoginState>(
       listener: (context, state) {
-        if (state.status.isSubmissionFailure) {
-          Scaffold.of(context)
+        if (state.status == FormzSubmissionStatus.failure) {
+          ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
               const SnackBar(content: Text('Authentication Failure')),
@@ -56,7 +56,7 @@ class _EmailInput extends StatelessWidget {
             prefixIcon: Icon(Icons.email_outlined),
             labelText: 'email',
             helperText: '',
-            errorText: state.email.invalid ? 'invalid email' : null,
+            errorText: state.email.isNotValid ? 'invalid email' : null,
           ),
         );
       },
@@ -79,7 +79,7 @@ class _PasswordInput extends StatelessWidget {
             prefixIcon: Icon(Icons.lock_outline),
             labelText: 'password',
             helperText: '',
-            errorText: state.password.invalid ? 'invalid password' : null,
+            errorText: state.password.isNotValid ? 'invalid password' : null,
           ),
         );
       },
@@ -93,16 +93,18 @@ class _LoginButton extends StatelessWidget {
     return BlocBuilder<LoginCubit, LoginState>(
       buildWhen: (previous, current) => previous.status != current.status,
       builder: (context, state) {
-        return state.status.isSubmissionInProgress
+        return state.status == FormzSubmissionStatus.inProgress
             ? const CircularProgressIndicator()
-            : RaisedButton(
+            : ElevatedButton(
                 key: const Key('loginForm_continue_raisedButton'),
                 child: const Text('LOGIN'),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  backgroundColor: const Color(0xFFFFD600),
                 ),
-                color: const Color(0xFFFFD600),
-                onPressed: state.status.isValidated
+                onPressed: Formz.validate([state.email, state.password])
                     ? () => context.read<LoginCubit>().logInWithCredentials()
                     : null,
               );
@@ -115,16 +117,18 @@ class _GoogleLoginButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return RaisedButton.icon(
+    return ElevatedButton.icon(
       key: const Key('loginForm_googleLogin_raisedButton'),
-      padding: EdgeInsets.all(8),
       label: const Text(
         'SIGN IN WITH GOOGLE',
         style: TextStyle(color: Colors.white),
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+        backgroundColor: theme.colorScheme.secondary,
+      ),
       icon: const Icon(FontAwesomeIcons.google, color: Colors.white),
-      color: theme.accentColor,
       onPressed: () => context.read<LoginCubit>().logInWithGoogle(),
     );
   }
@@ -134,11 +138,11 @@ class _SignUpButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return FlatButton(
+    return TextButton(
       key: const Key('loginForm_createAccount_flatButton'),
       child: Text(
         'CREATE ACCOUNT',
-        style: TextStyle(color: theme.accentColor),
+        style: TextStyle(color: theme.colorScheme.secondary),
       ),
       onPressed: () => Navigator.of(context).push<void>(SignUpPage.route()),
     );

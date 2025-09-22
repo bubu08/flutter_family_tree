@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 
 /// {@template user}
 /// User model
@@ -10,11 +9,11 @@ import 'package:meta/meta.dart';
 class User extends Equatable {
   /// {@macro user}
   const User({
-    @required this.email,
-    @required this.uid,
-    @required this.name,
-    @required this.photoURL,
-  }) : assert(uid != null);
+    required this.email,
+    required this.uid,
+    required this.name,
+    required this.photoURL,
+  });
 
   /// The user's email address.
   final String email;
@@ -29,7 +28,7 @@ class User extends Equatable {
   final String photoURL;
 
   /// Empty user which represents user not yet added to the database
-  static const empty = User(email: '', uid: '', name: '', photoURL: null);
+  static const empty = User(email: '', uid: '', name: '', photoURL: '');
 
   @override
   List<Object> get props => [email, uid, name, photoURL];

@@ -12,9 +12,6 @@ class EditPersonCubit extends Cubit<EditPersonState> {
     final firstNames = FirstNames.dirty(value);
     emit(state.copyWith(
       firstNames: firstNames,
-      status: Formz.validate([
-        firstNames,
-      ]),
     ));
   }
 
@@ -28,10 +25,6 @@ class EditPersonCubit extends Cubit<EditPersonState> {
     );
     emit(state.copyWith(
       lastNames: lastNames,
-      status: Formz.validate([
-        lastNames,
-        state.firstNames,
-      ]),
     ));
   }
 }

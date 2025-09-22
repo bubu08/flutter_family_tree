@@ -10,11 +10,10 @@ import 'package:family_tree/theme.dart';
 
 class App extends StatelessWidget {
   const App(
-      {Key key,
-      @required this.authenticationRepository,
-      this.dataBaseRepository})
-      : assert(authenticationRepository != null),
-        super(key: key);
+      {Key? key,
+      required this.authenticationRepository,
+      required this.dataBaseRepository})
+      : super(key: key);
 
   final AuthenticationRepository authenticationRepository;
   final DataBaseRepository dataBaseRepository;
@@ -57,7 +56,7 @@ class AppView extends StatefulWidget {
 class _AppViewState extends State<AppView> {
   final _navigatorKey = GlobalKey<NavigatorState>();
 
-  NavigatorState get _navigator => _navigatorKey.currentState;
+  NavigatorState get _navigator => _navigatorKey.currentState!;
 
   @override
   Widget build(BuildContext context) {
