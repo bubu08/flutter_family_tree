@@ -160,7 +160,7 @@ pipeline {
               existing=$(security list-keychains | tr -d '"' | tr '\n' ' ')
               security list-keychains -s "$KEYCHAIN_PATH" $existing
               security default-keychain -s "$KEYCHAIN_PATH"
-              security import "$IOS_CERT_P12" -k "$KEYCHAIN_PATH" -P "$IOS_CERT_PASSWORD" -T /usr/bin/codesign
+              security import "$IOS_CERT_P12" -k "$KEYCHAIN_PATH" -P "$IOS_CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
               security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
               mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
               profile_basename=$(basename "$IOS_PROVISION_PROFILE")
@@ -188,23 +188,43 @@ pipeline {
               def profileUuid = details[2]?.trim()
               def bundleId = details[3]?.trim()
 
+              def identity = sh(
+                script: '''
+                  set -euo pipefail
+                  KEYCHAIN_PATH="$HOME/Library/Keychains/$KEYCHAIN_NAME"
+                  security find-identity -v -p codesign "$KEYCHAIN_PATH" | awk -F'"' '/"/ {print $2}' | head -n 1
+                ''',
+                returnStdout: true
+              ).trim()
+
+              if (!identity) {
+                error('No signing identity available in imported keychain')
+              }
+
               env.IOS_TEAM_ID = teamId ?: ''
               env.IOS_PROFILE_NAME = profileName ?: ''
               env.IOS_PROFILE_UUID = profileUuid ?: ''
               env.IOS_BUNDLE_IDENTIFIER = bundleId ?: ''
-              env.IOS_CODE_SIGN_IDENTITY = 'Apple Distribution'
+              env.IOS_CODE_SIGN_IDENTITY = identity
 
-              def escapedProfileName = (profileName ?: '').replace('\\', '\\\\').replace('"', '\\"')
-              def signingConfig = """
-APP_BUNDLE_IDENTIFIER = ${bundleId ?: 'com.thomas.giatocphamdinh'}
-APP_CODE_SIGN_IDENTITY = Apple Distribution
-APP_CODE_SIGN_STYLE = Manual
-APP_DEVELOPMENT_TEAM = ${teamId ?: ''}
-APP_PROVISIONING_PROFILE = ${profileUuid ?: ''}
-APP_PROVISIONING_PROFILE_SPECIFIER = \"${escapedProfileName}\"
-""".stripIndent().trim() + '\n'
+              def quoteIfNeeded = { value ->
+                if (!value) {
+                  return ''
+                }
+                def escaped = value.replace('\\', '\\\\').replace('"', '\\"')
+                return (escaped =~ /\s/ || escaped.contains('(') || escaped.contains(')')) ? "\"${escaped}\"" : escaped
+              }
 
-              writeFile file: 'ios/Flutter/ci_signing.xcconfig', text: signingConfig
+              def signingLines = [
+                "APP_BUNDLE_IDENTIFIER = ${bundleId ?: 'com.example.familyTree'}",
+                "APP_CODE_SIGN_IDENTITY = ${quoteIfNeeded(identity)}",
+                'APP_CODE_SIGN_STYLE = Manual',
+                "APP_DEVELOPMENT_TEAM = ${teamId ?: ''}",
+                "APP_PROVISIONING_PROFILE = ${profileUuid ?: ''}",
+                "APP_PROVISIONING_PROFILE_SPECIFIER = ${quoteIfNeeded(profileName ?: '')}"
+              ]
+
+              writeFile file: 'ios/Flutter/ci_signing.xcconfig', text: signingLines.join('\n') + '\n'
             }
           }
         }
