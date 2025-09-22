@@ -189,6 +189,7 @@ pipeline {
               sh 'bundle exec fastlane android tests'
               sh 'bundle exec fastlane android build_release'
             }
+            archiveArtifacts artifacts: 'build/app/outputs/**/*.apk,build/app/outputs/**/*.aab', allowEmptyArchive: true, fingerprint: true
           }
         }
       }
