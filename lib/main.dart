@@ -7,9 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:family_tree/app.dart';
 import 'package:family_tree/simple_bloc_observer.dart';
+import 'package:family_tree/config/app_secrets.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  AppSecrets.ensureLoaded();
   
   // Initialize Firebase with proper web configuration
   if (kIsWeb) {

@@ -40,9 +40,12 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Secret Information
-android\app\google-services.json
-android/app/google-services.json
+# Local environment overrides
+.env
+.env.*
 
+# Secret Information
+android\\app\\google-services.json
+android/app/google-services.json
 
 ios/Runner/GoogleService-Info.plist

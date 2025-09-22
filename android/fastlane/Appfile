@@ -1,0 +1,2 @@
+json_key_file(ENV["PLAY_SERVICE_ACCOUNT_JSON"] || "../fastlane/play-store-service-account.json")
+package_name("com.thomas.giatocphamdinh")
