@@ -161,7 +161,10 @@ pipeline {
               security import "$IOS_CERT_P12" -k "$KEYCHAIN_PATH" -P "$IOS_CERT_PASSWORD" -T /usr/bin/codesign
               security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
               mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+              profile_basename=$(basename "$IOS_PROVISION_PROFILE")
+              rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_basename"
               cp "$IOS_PROVISION_PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/"
+              chmod 0644 "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_basename"
             '''
           }
         }
