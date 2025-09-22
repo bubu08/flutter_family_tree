@@ -1,2 +1,10 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
 #include "Generated.xcconfig"
+#include? "ci_signing.xcconfig"
+
+APP_BUNDLE_IDENTIFIER = com.example.familyTree
+APP_CODE_SIGN_IDENTITY = iPhone Developer
+APP_CODE_SIGN_STYLE = Automatic
+APP_DEVELOPMENT_TEAM =
+APP_PROVISIONING_PROFILE =
+APP_PROVISIONING_PROFILE_SPECIFIER =

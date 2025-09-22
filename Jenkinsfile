@@ -3,6 +3,8 @@ pipeline {
 
   environment {
     FLUTTER_CHANNEL = 'stable'
+    LANG = 'en_US.UTF-8'
+    LC_ALL = 'en_US.UTF-8'
   }
 
   options {
@@ -166,6 +168,44 @@ pipeline {
               cp "$IOS_PROVISION_PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/"
               chmod 0644 "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_basename"
             '''
+            script {
+              def details = sh(
+                script: '''
+                  set -euo pipefail
+                  tmp=$(mktemp)
+                  security cms -D -i "$IOS_PROVISION_PROFILE" >"$tmp"
+                  team_id=$(/usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$tmp")
+                  profile_name=$(/usr/libexec/PlistBuddy -c "Print :Name" "$tmp")
+                  profile_uuid=$(/usr/libexec/PlistBuddy -c "Print :UUID" "$tmp")
+                  app_identifier=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$tmp" | sed -E 's/^[A-Z0-9]+\\.//')
+                  printf '%s\n%s\n%s\n%s\n' "$team_id" "$profile_name" "$profile_uuid" "$app_identifier"
+                ''',
+                returnStdout: true
+              ).trim().split('\n')
+
+              def teamId = details[0]?.trim()
+              def profileName = details[1]?.trim()
+              def profileUuid = details[2]?.trim()
+              def bundleId = details[3]?.trim()
+
+              env.IOS_TEAM_ID = teamId ?: ''
+              env.IOS_PROFILE_NAME = profileName ?: ''
+              env.IOS_PROFILE_UUID = profileUuid ?: ''
+              env.IOS_BUNDLE_IDENTIFIER = bundleId ?: ''
+              env.IOS_CODE_SIGN_IDENTITY = 'Apple Distribution'
+
+              def escapedProfileName = (profileName ?: '').replace('\\', '\\\\').replace('"', '\\"')
+              def signingConfig = """
+APP_BUNDLE_IDENTIFIER = ${bundleId ?: 'com.thomas.giatocphamdinh'}
+APP_CODE_SIGN_IDENTITY = Apple Distribution
+APP_CODE_SIGN_STYLE = Manual
+APP_DEVELOPMENT_TEAM = ${teamId ?: ''}
+APP_PROVISIONING_PROFILE = ${profileUuid ?: ''}
+APP_PROVISIONING_PROFILE_SPECIFIER = \"${escapedProfileName}\"
+""".stripIndent().trim() + '\n'
+
+              writeFile file: 'ios/Flutter/ci_signing.xcconfig', text: signingConfig
+            }
           }
         }
       }
@@ -217,7 +257,12 @@ pipeline {
           withEnv([
             'APPSTORE_KEY_PATH=' + APPSTORE_KEY_FILE,
             'APPSTORE_KEY_ID=' + APPSTORE_KEY_ID,
-            'APPSTORE_ISSUER_ID=' + APPSTORE_ISSUER_ID
+            'APPSTORE_ISSUER_ID=' + APPSTORE_ISSUER_ID,
+            'DEVELOPMENT_TEAM=' + (env.IOS_TEAM_ID ?: ''),
+            'PROVISIONING_PROFILE_SPECIFIER=' + (env.IOS_PROFILE_NAME ?: ''),
+            'PROVISIONING_PROFILE=' + (env.IOS_PROFILE_UUID ?: ''),
+            'CODE_SIGN_IDENTITY=' + (env.IOS_CODE_SIGN_IDENTITY ?: 'Apple Distribution'),
+            'APP_BUNDLE_IDENTIFIER=' + (env.IOS_BUNDLE_IDENTIFIER ?: '')
           ]) {
             sh '''
               set -euo pipefail
