@@ -52,7 +52,7 @@ pipeline {
           env.SDKROOT = sdkPath
 
           def archHdrExists = sh(
-            script: "test -d '${rubyArchHdrDir}' && echo yes || echo no",
+            script: "test -f '${rubyArchHdrDir}/ruby/config.h' && echo yes || echo no",
             returnStdout: true
           ).trim() == 'yes'
           if (!archHdrExists) {
@@ -68,6 +68,20 @@ pipeline {
 
           env.RUBY_HDR_DIR = rubyHdrDir
           env.RUBY_ARCH_HDR_DIR = rubyArchHdrDir
+          env.RUBY_HDR_DIR_OVERRIDE = rubyHdrDir
+          env.RUBY_ARCH_HDR_DIR_OVERRIDE = rubyArchHdrDir
+
+          def existingRubyOpt = env.RUBYOPT ?: ''
+          def rubyOptComponents = existingRubyOpt.tokenize(' ')
+          def overrideRequire = "-I${env.WORKSPACE}/ci"
+          def overrideLibrary = '-rrbconfig_override'
+          if (!rubyOptComponents.contains(overrideRequire)) {
+            rubyOptComponents << overrideRequire
+          }
+          if (!rubyOptComponents.contains(overrideLibrary)) {
+            rubyOptComponents << overrideLibrary
+          }
+          env.RUBYOPT = rubyOptComponents.join(' ').trim()
 
           def gemRoot = "${env.WORKSPACE}/.bundle"
           env.GEM_HOME = "${gemRoot}/ruby/${rubyVersion}"
@@ -86,7 +100,7 @@ pipeline {
           if [ ! -x "${GEM_HOME}/bin/bundle" ]; then
             gem install bundler --no-document --install-dir "${GEM_HOME}" --bindir "${GEM_HOME}/bin"
           fi
-          include_args="--with-opt-include=${RUBY_HDR_DIR}:${RUBY_ARCH_HDR_DIR} --with-arch-hdrdir=${RUBY_ARCH_HDR_DIR}"
+          include_args="--with-rubyhdrdir=${RUBY_HDR_DIR} --with-rubyarchhdrdir=${RUBY_ARCH_HDR_DIR} --with-opt-include=${RUBY_HDR_DIR}:${RUBY_ARCH_HDR_DIR}"
           "${GEM_HOME}/bin/bundle" config set --local build.nkf "${include_args}"
           "${GEM_HOME}/bin/bundle" config set --local build.json "${include_args}"
           "${GEM_HOME}/bin/bundle" config set --local build.sysrandom "${include_args}"
