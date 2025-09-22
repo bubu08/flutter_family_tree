@@ -1,5 +1,6 @@
 name: database_repository
 description: Dart package which manages database queries.
+publish_to: 'none'
 version: 1.0.0
 
 environment:
