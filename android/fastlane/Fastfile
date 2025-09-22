@@ -1,3 +1,16 @@
+require 'shellwords'
+
+def flutter_project_root
+  File.expand_path('../../', __dir__)
+end
+
+def run_flutter(command, env: {})
+  root = flutter_project_root
+  env_assignment = env.map { |key, value| "#{key}=#{Shellwords.escape(value)}" }.join(' ')
+  shell_command = [env_assignment, command].reject(&:empty?).join(' ')
+  sh("cd #{Shellwords.escape(root)} && #{shell_command}")
+end
+
 default_platform(:android)
 
 platform :android do
@@ -7,17 +20,17 @@ platform :android do
 
   desc "Run Flutter unit tests"
   lane :tests do
-    sh("flutter test --dart-define=DEMO_SECRET=#{ENV['DEMO_SECRET']}")
+    run_flutter('flutter test --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
   end
 
   desc "Build a debug APK"
   lane :build_debug do
-    sh("flutter build apk --debug --dart-define=DEMO_SECRET=#{ENV['DEMO_SECRET']}")
+    run_flutter('flutter build apk --debug --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
   end
 
   desc "Build a release App Bundle"
   lane :build_release do
-    sh("flutter build appbundle --release --dart-define=DEMO_SECRET=#{ENV['DEMO_SECRET']}")
+    run_flutter('flutter build appbundle --release --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
   end
 
   desc "Upload release bundle to Play internal testing"

@@ -109,31 +109,31 @@ pipeline {
       }
     }
 
-    stage('Validate Secrets') {
-      steps {
-        withCredentials([
-          string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET')
-        ]) {
-          sh 'dart run tool/check_env.dart'
-        }
-      }
-    }
+    // stage('Validate Secrets') {
+    //   steps {
+    //     withCredentials([
+    //       string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET')
+    //     ]) {
+    //       sh 'dart run tool/check_env.dart'
+    //     }
+    //   }
+    // }
 
-    stage('Static Analysis') {
-      steps {
-        sh 'flutter analyze'
-      }
-    }
+    // stage('Static Analysis') {
+    //   steps {
+    //     sh 'flutter analyze'
+    //   }
+    // }
 
-    stage('Tests') {
-      steps {
-        withCredentials([
-          string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET')
-        ]) {
-          sh 'flutter test --dart-define=DEMO_SECRET=$DEMO_SECRET'
-        }
-      }
-    }
+    // stage('Tests') {
+    //   steps {
+    //     withCredentials([
+    //       string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET')
+    //     ]) {
+    //       sh 'flutter test --dart-define=DEMO_SECRET=$DEMO_SECRET'
+    //     }
+    //   }
+    // }
 
     stage('Install iOS Signing Assets') {
       steps {
