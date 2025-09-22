@@ -225,6 +225,7 @@ pipeline {
               ]
 
               writeFile file: 'ios/Flutter/ci_signing.xcconfig', text: signingLines.join('\n') + '\n'
+              echo "Configured iOS signing for bundle ${bundleId ?: 'com.thomas.giatocphamdinh'} using identity '${identity}' and profile '${profileName ?: ''}'"
             }
           }
         }
