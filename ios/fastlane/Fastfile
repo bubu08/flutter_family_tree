@@ -1,3 +1,16 @@
+require 'shellwords'
+
+def flutter_project_root
+  File.expand_path('../../', __dir__)
+end
+
+def run_flutter(command, env: {})
+  root = flutter_project_root
+  env_assignment = env.map { |key, value| "#{key}=#{Shellwords.escape(value)}" }.join(' ')
+  shell_command = [env_assignment, command].reject(&:empty?).join(' ')
+  sh("cd #{Shellwords.escape(root)} && #{shell_command}")
+end
+
 def ensure_app_store_connect_api_key!
   key_path = ENV['APPSTORE_KEY_PATH']
   key_id = ENV['APPSTORE_KEY_ID']
@@ -27,17 +40,17 @@ platform :ios do
 
   desc "Run Flutter unit tests"
   lane :tests do
-    sh("flutter test --dart-define=DEMO_SECRET=#{ENV['DEMO_SECRET']}")
+    run_flutter('flutter test --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
   end
 
   desc "Build iOS debug"
   lane :build_debug do
-    sh("flutter build ios --debug --no-codesign --dart-define=DEMO_SECRET=#{ENV['DEMO_SECRET']}")
+    run_flutter('flutter build ios --debug --no-codesign --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
   end
 
   desc "Build release IPA"
   lane :build_release do
-    sh("flutter build ipa --release --dart-define=DEMO_SECRET=#{ENV['DEMO_SECRET']}")
+    run_flutter('flutter build ipa --release --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
   end
 
   desc "Upload to TestFlight"
