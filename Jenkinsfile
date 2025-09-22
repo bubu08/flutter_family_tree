@@ -171,9 +171,11 @@ pipeline {
           string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET'),
           file(credentialsId: 'play-service-account', variable: 'PLAY_JSON')
         ]) {
-          withEnv(["PLAY_SERVICE_ACCOUNT_JSON=${PLAY_JSON}"]) {
-            sh 'bundle exec fastlane android tests'
-            sh 'bundle exec fastlane android build_release'
+          withEnv(['PLAY_SERVICE_ACCOUNT_JSON=' + PLAY_JSON]) {
+            dir('android') {
+              sh 'bundle exec fastlane android tests'
+              sh 'bundle exec fastlane android build_release'
+            }
           }
         }
       }
@@ -188,12 +190,14 @@ pipeline {
           string(credentialsId: 'appstore-connect-issuer-id', variable: 'APPSTORE_ISSUER_ID')
         ]) {
           withEnv([
-            "APPSTORE_KEY_PATH=${APPSTORE_KEY_FILE}",
-            "APPSTORE_KEY_ID=${APPSTORE_KEY_ID}",
-            "APPSTORE_ISSUER_ID=${APPSTORE_ISSUER_ID}"
+            'APPSTORE_KEY_PATH=' + APPSTORE_KEY_FILE,
+            'APPSTORE_KEY_ID=' + APPSTORE_KEY_ID,
+            'APPSTORE_ISSUER_ID=' + APPSTORE_ISSUER_ID
           ]) {
-            sh 'bundle exec fastlane ios tests'
-            sh 'bundle exec fastlane ios build_release'
+            dir('ios') {
+              sh 'bundle exec fastlane ios tests'
+              sh 'bundle exec fastlane ios build_release'
+            }
           }
         }
       }
