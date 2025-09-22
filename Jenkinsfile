@@ -25,7 +25,21 @@ pipeline {
 
     stage('Bundle Install') {
       steps {
-        sh 'bundle install'
+        script {
+          def rubyVersion = sh(
+            script: "ruby -e 'print RbConfig::CONFIG[\"ruby_version\"]'",
+            returnStdout: true
+          ).trim()
+          env.GEM_HOME = "${env.HOME}/.gem/ruby/${rubyVersion}"
+          env.PATH = "${env.GEM_HOME}/bin:${env.PATH}"
+        }
+        sh '''
+          set -euo pipefail
+          if ! command -v bundle >/dev/null 2>&1; then
+            gem install --user-install bundler --no-document
+          fi
+          bundle install
+        '''
       }
     }
 
