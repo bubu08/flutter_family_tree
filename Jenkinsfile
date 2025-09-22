@@ -35,6 +35,27 @@ pipeline {
           env.GEM_PATH = env.GEM_HOME
           env.BUNDLE_PATH = env.GEM_HOME
           env.PATH = "${env.GEM_HOME}/bin:${env.PATH}"
+          env.RUBY_VERSION_FULL = rubyVersion
+          def rubyParts = rubyVersion.tokenize('.')
+          def rubySeries = rubyParts.size() >= 2 ? "${rubyParts[0]}.${rubyParts[1]}" : rubyVersion
+          env.RUBY_VERSION_SERIES = rubySeries
+          def rubyArch = sh(
+            script: "ruby -e 'print RbConfig::CONFIG[\\"arch\\"]'",
+            returnStdout: true
+          ).trim()
+          env.RUBY_ARCH = rubyArch
+          def sdkPath = sh(
+            script: 'xcrun --sdk macosx --show-sdk-path',
+            returnStdout: true
+          ).trim()
+          env.SDKROOT = sdkPath
+          def includeBase = "${sdkPath}/System/Library/Frameworks/Ruby.framework/Versions/${rubySeries}/usr/include"
+          def rubyInclude = "${includeBase}/ruby-${rubyVersion}"
+          def rubyArchInclude = "${rubyInclude}/${rubyArch}"
+          def existingCpath = env.CPATH?.trim()
+          env.CPATH = [includeBase, rubyInclude, rubyArchInclude, existingCpath]
+            .findAll { it && it.trim() }
+            .join(':')
         }
         sh '''
           set -euo pipefail
@@ -42,6 +63,8 @@ pipeline {
           if [ ! -x "${GEM_HOME}/bin/bundle" ]; then
             gem install bundler --no-document --install-dir "${GEM_HOME}" --bindir "${GEM_HOME}/bin"
           fi
+          bundle_include_args="--with-opt-include=${SDKROOT}/System/Library/Frameworks/Ruby.framework/Versions/${RUBY_VERSION_SERIES}/usr/include:${SDKROOT}/System/Library/Frameworks/Ruby.framework/Versions/${RUBY_VERSION_SERIES}/usr/include/ruby-${RUBY_VERSION_FULL}:${SDKROOT}/System/Library/Frameworks/Ruby.framework/Versions/${RUBY_VERSION_SERIES}/usr/include/ruby-${RUBY_VERSION_FULL}/${RUBY_ARCH}"
+          "${GEM_HOME}/bin/bundle" config set --local build.nkf "${bundle_include_args}"
           "${GEM_HOME}/bin/bundle" install
         '''
       }
