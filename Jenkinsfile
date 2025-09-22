@@ -179,7 +179,12 @@ pipeline {
           file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG')
         ]) {
           withEnv(['PLAY_SERVICE_ACCOUNT_JSON=' + PLAY_JSON]) {
-            sh "cp '${FIREBASE_ANDROID_CONFIG}' android/app/google-services.json"
+            sh '''
+              set -euo pipefail
+              rm -f android/app/google-services.json
+              cp "$FIREBASE_ANDROID_CONFIG" android/app/google-services.json
+              chmod 0644 android/app/google-services.json
+            '''
             dir('android') {
               sh 'bundle exec fastlane android tests'
               sh 'bundle exec fastlane android build_release'
