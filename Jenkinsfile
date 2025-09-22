@@ -176,9 +176,19 @@ pipeline {
         withCredentials([
           string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET'),
           file(credentialsId: 'play-service-account', variable: 'PLAY_JSON'),
-          file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG')
+          file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG'),
+          file(credentialsId: 'android-keystore', variable: 'ANDROID_KEYSTORE_FILE'),
+          string(credentialsId: 'android-keystore-password', variable: 'ANDROID_KEYSTORE_PASSWORD'),
+          string(credentialsId: 'android-key-alias', variable: 'ANDROID_KEY_ALIAS'),
+          string(credentialsId: 'android-key-password', variable: 'ANDROID_KEY_PASSWORD')
         ]) {
-          withEnv(['PLAY_SERVICE_ACCOUNT_JSON=' + PLAY_JSON]) {
+          withEnv([
+            'PLAY_SERVICE_ACCOUNT_JSON=' + PLAY_JSON,
+            'ANDROID_KEYSTORE_PATH=' + ANDROID_KEYSTORE_FILE,
+            'ANDROID_KEYSTORE_PASSWORD=' + ANDROID_KEYSTORE_PASSWORD,
+            'ANDROID_KEY_ALIAS=' + ANDROID_KEY_ALIAS,
+            'ANDROID_KEY_PASSWORD=' + ANDROID_KEY_PASSWORD
+          ]) {
             sh '''
               set -euo pipefail
               rm -f android/app/google-services.json

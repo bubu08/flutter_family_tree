@@ -43,9 +43,46 @@ android {
         versionName flutterVersionName
     }
 
+    def loadEnvOrProp = { key ->
+        def envKey = "ANDROID_${key.toUpperCase()}"
+        def envValue = System.getenv(envKey)
+        if (envValue != null && !envValue.trim().isEmpty()) {
+            return envValue
+        }
+        return null
+    }
+
+    def keystoreProperties = new Properties()
+    def keystorePropertiesFile = rootProject.file('key.properties')
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.withReader('UTF-8') { reader ->
+            keystoreProperties.load(reader)
+        }
+    }
+
+    signingConfigs {
+        release {
+            initWith signingConfigs.debug
+
+            def storeFilePath = loadEnvOrProp('keystore_path') ?: keystoreProperties['storeFile']
+            def storePasswordValue = loadEnvOrProp('keystore_password') ?: keystoreProperties['storePassword']
+            def keyAliasValue = loadEnvOrProp('key_alias') ?: keystoreProperties['keyAlias']
+            def keyPasswordValue = loadEnvOrProp('key_password') ?: keystoreProperties['keyPassword']
+
+            if (storeFilePath && storePasswordValue && keyAliasValue && keyPasswordValue) {
+                storeFile file(storeFilePath)
+                storePassword storePasswordValue
+                keyAlias keyAliasValue
+                keyPassword keyPasswordValue
+            } else {
+                println 'Release keystore configuration missing; falling back to debug signing keys.'
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }
