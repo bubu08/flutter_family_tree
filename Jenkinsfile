@@ -27,7 +27,7 @@ pipeline {
       steps {
         script {
           def rubyVersion = sh(
-            script: "ruby -e 'print RbConfig::CONFIG[\"ruby_version\"]'",
+            script: 'ruby -rrbconfig -e "print RbConfig::CONFIG[\'ruby_version\']"',
             returnStdout: true
           ).trim()
           def gemRoot = "${env.WORKSPACE}/.bundle"
@@ -40,7 +40,7 @@ pipeline {
           def rubySeries = rubyParts.size() >= 2 ? "${rubyParts[0]}.${rubyParts[1]}" : rubyVersion
           env.RUBY_VERSION_SERIES = rubySeries
           def rubyArch = sh(
-            script: "ruby -e 'print RbConfig::CONFIG[\\"arch\\"]'",
+            script: 'ruby -rrbconfig -e "print RbConfig::CONFIG[\'arch\']"',
             returnStdout: true
           ).trim()
           env.RUBY_ARCH = rubyArch
