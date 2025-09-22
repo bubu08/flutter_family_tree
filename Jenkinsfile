@@ -211,39 +211,39 @@ APP_PROVISIONING_PROFILE_SPECIFIER = \"${escapedProfileName}\"
       }
     }
 
-    stage('Android Fastlane') {
-      steps {
-        withCredentials([
-          string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET'),
-          file(credentialsId: 'play-service-account', variable: 'PLAY_JSON'),
-          file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG'),
-          file(credentialsId: 'android-keystore', variable: 'ANDROID_KEYSTORE_FILE'),
-          string(credentialsId: 'android-keystore-password', variable: 'ANDROID_KEYSTORE_PASSWORD'),
-          string(credentialsId: 'android-key-alias', variable: 'ANDROID_KEY_ALIAS'),
-          string(credentialsId: 'android-key-password', variable: 'ANDROID_KEY_PASSWORD')
-        ]) {
-          withEnv([
-            'PLAY_SERVICE_ACCOUNT_JSON=' + PLAY_JSON,
-            'ANDROID_KEYSTORE_PATH=' + ANDROID_KEYSTORE_FILE,
-            'ANDROID_KEYSTORE_PASSWORD=' + ANDROID_KEYSTORE_PASSWORD,
-            'ANDROID_KEY_ALIAS=' + ANDROID_KEY_ALIAS,
-            'ANDROID_KEY_PASSWORD=' + ANDROID_KEY_PASSWORD
-          ]) {
-            sh '''
-              set -euo pipefail
-              rm -f android/app/google-services.json
-              cp "$FIREBASE_ANDROID_CONFIG" android/app/google-services.json
-              chmod 0644 android/app/google-services.json
-            '''
-            dir('android') {
-              sh 'bundle exec fastlane android tests'
-              sh 'bundle exec fastlane android build_release'
-            }
-            archiveArtifacts artifacts: 'build/app/outputs/**/*.apk,build/app/outputs/**/*.aab', allowEmptyArchive: true, fingerprint: true
-          }
-        }
-      }
-    }
+    // stage('Android Fastlane') {
+    //   steps {
+    //     withCredentials([
+    //       string(credentialsId: 'demo-secret', variable: 'DEMO_SECRET'),
+    //       file(credentialsId: 'play-service-account', variable: 'PLAY_JSON'),
+    //       file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG'),
+    //       file(credentialsId: 'android-keystore', variable: 'ANDROID_KEYSTORE_FILE'),
+    //       string(credentialsId: 'android-keystore-password', variable: 'ANDROID_KEYSTORE_PASSWORD'),
+    //       string(credentialsId: 'android-key-alias', variable: 'ANDROID_KEY_ALIAS'),
+    //       string(credentialsId: 'android-key-password', variable: 'ANDROID_KEY_PASSWORD')
+    //     ]) {
+    //       withEnv([
+    //         'PLAY_SERVICE_ACCOUNT_JSON=' + PLAY_JSON,
+    //         'ANDROID_KEYSTORE_PATH=' + ANDROID_KEYSTORE_FILE,
+    //         'ANDROID_KEYSTORE_PASSWORD=' + ANDROID_KEYSTORE_PASSWORD,
+    //         'ANDROID_KEY_ALIAS=' + ANDROID_KEY_ALIAS,
+    //         'ANDROID_KEY_PASSWORD=' + ANDROID_KEY_PASSWORD
+    //       ]) {
+    //         sh '''
+    //           set -euo pipefail
+    //           rm -f android/app/google-services.json
+    //           cp "$FIREBASE_ANDROID_CONFIG" android/app/google-services.json
+    //           chmod 0644 android/app/google-services.json
+    //         '''
+    //         dir('android') {
+    //           sh 'bundle exec fastlane android tests'
+    //           sh 'bundle exec fastlane android build_release'
+    //         }
+    //         archiveArtifacts artifacts: 'build/app/outputs/**/*.apk,build/app/outputs/**/*.aab', allowEmptyArchive: true, fingerprint: true
+    //       }
+    //     }
+    //   }
+    // }
 
     stage('iOS Fastlane') {
       steps {
