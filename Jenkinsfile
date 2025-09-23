@@ -77,11 +77,15 @@ pipeline {
           def rubyOptComponents = existingRubyOpt.tokenize(' ')
           def overrideRequire = "-I${env.WORKSPACE}/ci"
           def overrideLibrary = '-rrbconfig_override'
+          def encodingFlag = '-EUTF-8'
           if (!rubyOptComponents.contains(overrideRequire)) {
             rubyOptComponents << overrideRequire
           }
           if (!rubyOptComponents.contains(overrideLibrary)) {
             rubyOptComponents << overrideLibrary
+          }
+          if (!rubyOptComponents.contains(encodingFlag)) {
+            rubyOptComponents << encodingFlag
           }
           env.RUBYOPT = rubyOptComponents.join(' ').trim()
 
