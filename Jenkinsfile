@@ -228,12 +228,14 @@ pipeline {
               }
 
               def signingLines = [
-                "APP_BUNDLE_IDENTIFIER = ${bundleIdEffective}",
-                "APP_CODE_SIGN_IDENTITY = ${quoteIfNeeded(identity)}",
-                'APP_CODE_SIGN_STYLE = Manual',
-                "APP_DEVELOPMENT_TEAM = ${teamId ?: ''}",
-                "APP_PROVISIONING_PROFILE = ${profileUuid ?: ''}",
-                "APP_PROVISIONING_PROFILE_SPECIFIER = ${quoteIfNeeded(profileName ?: '')}"
+                "PRODUCT_BUNDLE_IDENTIFIER = ${bundleIdEffective}",
+                "CODE_SIGN_IDENTITY = ${quoteIfNeeded(identity)}",
+                'CODE_SIGN_STYLE = Manual',
+                "DEVELOPMENT_TEAM = ${teamId ?: ''}",
+                "PROVISIONING_PROFILE = ${profileUuid ?: ''}",
+                "PROVISIONING_PROFILE_SPECIFIER = ${quoteIfNeeded(profileName ?: '')}",
+                'CODE_SIGNING_ALLOWED = YES',
+                'CODE_SIGNING_REQUIRED = YES'
               ]
 
               writeFile file: 'ios/Flutter/ci_signing.xcconfig', text: signingLines.join('\n') + '\n'
@@ -304,7 +306,8 @@ pipeline {
             'PROVISIONING_PROFILE_SPECIFIER=' + (env.IOS_PROFILE_NAME ?: ''),
             'PROVISIONING_PROFILE=' + (env.IOS_PROFILE_UUID ?: ''),
             'CODE_SIGN_IDENTITY=' + (env.IOS_CODE_SIGN_IDENTITY ?: 'Apple Distribution'),
-            'APP_BUNDLE_IDENTIFIER=' + (env.IOS_BUNDLE_IDENTIFIER ?: ''),
+            'PRODUCT_BUNDLE_IDENTIFIER=' + (env.IOS_BUNDLE_IDENTIFIER ?: ''),
+            'CODE_SIGN_STYLE=' + 'Manual',
             'KEYCHAIN_NAME=ios-build.keychain-db',
             'KEYCHAIN_PASSWORD=ci-temp-pass',
             'FLUTTER_XCODE_CONFIG_FILE=Flutter/ci_signing.xcconfig'

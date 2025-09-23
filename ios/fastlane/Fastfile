@@ -9,6 +9,7 @@ def run_flutter(command, env: {})
   passthrough_keys = %w[
     FLUTTER_XCODE_CONFIG_FILE
     APP_BUNDLE_IDENTIFIER
+    PRODUCT_BUNDLE_IDENTIFIER
     CODE_SIGN_IDENTITY
     DEVELOPMENT_TEAM
     PROVISIONING_PROFILE
