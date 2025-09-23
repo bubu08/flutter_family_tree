@@ -197,20 +197,20 @@ pipeline {
                 script: '''
                   set -euo pipefail
                   KEYCHAIN_PATH="$HOME/Library/Keychains/$KEYCHAIN_NAME"
-                  security find-identity -v -p codesigning "$KEYCHAIN_PATH" || true
+                  security find-identity -v -p codesigning "$KEYCHAIN_PATH"
                 ''',
+                returnStatus: true,
                 returnStdout: true
               )
 
-              def identity = identityOutput.readLines()
-                .collect { line ->
-                  def matcher = (line =~ /"([^"]+)"/)
-                  matcher ? matcher[0][1] : null
-                }
-                .find { it }
+              def identityLines = identityOutput?.trim()?.readLines() ?: []
+              def identity = identityLines.collect { line ->
+                def matcher = (line =~ /"([^\"]+)"/)
+                matcher ? matcher[0][1] : null
+              }.find { it }
 
               if (!identity) {
-                error("No signing identity available in imported keychain. security output: ${identityOutput}")
+                error("No signing identity available in imported keychain. security output:\n${identityLines.join('\n')}")
               }
 
               env.IOS_TEAM_ID = teamId ?: ''
