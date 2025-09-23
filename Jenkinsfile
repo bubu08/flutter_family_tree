@@ -304,11 +304,43 @@ pipeline {
             'PROVISIONING_PROFILE_SPECIFIER=' + (env.IOS_PROFILE_NAME ?: ''),
             'PROVISIONING_PROFILE=' + (env.IOS_PROFILE_UUID ?: ''),
             'CODE_SIGN_IDENTITY=' + (env.IOS_CODE_SIGN_IDENTITY ?: 'Apple Distribution'),
-            'APP_BUNDLE_IDENTIFIER=' + (env.IOS_BUNDLE_IDENTIFIER ?: '')
+            'APP_BUNDLE_IDENTIFIER=' + (env.IOS_BUNDLE_IDENTIFIER ?: ''),
+            'KEYCHAIN_NAME=ios-build.keychain-db',
+            'KEYCHAIN_PASSWORD=ci-temp-pass'
           ]) {
             sh '''
               set -euo pipefail
               install -m 0644 "$FIREBASE_IOS_CONFIG" ios/Runner/GoogleService-Info.plist
+            '''
+            sh '''
+              set -euo pipefail
+              KEYCHAIN_PATH="$HOME/Library/Keychains/$KEYCHAIN_NAME"
+              echo '--- security list-keychains ---'
+              security list-keychains
+              echo ''
+              echo '--- security default-keychain ---'
+              security default-keychain
+              echo ''
+              if [ -n "${KEYCHAIN_PASSWORD:-}" ]; then
+                security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" || true
+              fi
+              echo '--- security show-keychain-info (custom) ---'
+              security show-keychain-info "$KEYCHAIN_PATH" || true
+              echo ''
+              echo '--- security show-keychain-info (login) ---'
+              security show-keychain-info "$HOME/Library/Keychains/login.keychain-db" || true
+              echo ''
+              echo '--- security find-identity (custom) ---'
+              security find-identity -v -p codesigning "$KEYCHAIN_PATH" || true
+              echo ''
+              echo '--- security find-identity (login) ---'
+              security find-identity -v -p codesigning "$HOME/Library/Keychains/login.keychain-db" || true
+              echo ''
+              echo '--- Worldwide Developer Relations certificates ---'
+              security find-certificate -a -c "Worldwide Developer Relations" /Library/Keychains/System.keychain || true
+              echo ''
+              echo '--- Developer ID - G2 certificates ---'
+              security find-certificate -a -c "Developer ID - G2" /Library/Keychains/System.keychain || true
             '''
             dir('ios') {
               sh 'bundle exec fastlane ios tests'
