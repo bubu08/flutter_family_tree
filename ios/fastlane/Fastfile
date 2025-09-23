@@ -6,6 +6,22 @@ end
 
 def run_flutter(command, env: {})
   root = flutter_project_root
+  passthrough_keys = %w[
+    FLUTTER_XCODE_CONFIG_FILE
+    APP_BUNDLE_IDENTIFIER
+    CODE_SIGN_IDENTITY
+    DEVELOPMENT_TEAM
+    PROVISIONING_PROFILE
+    PROVISIONING_PROFILE_SPECIFIER
+    CODE_SIGNING_ALLOWED
+    CODE_SIGNING_REQUIRED
+    CODE_SIGN_STYLE
+  ]
+  passthrough_keys.each do |key|
+    value = ENV[key]
+    next if value.to_s.empty?
+    env[key] = value unless env.key?(key)
+  end
   env_assignment = env.map { |key, value| "#{key}=#{Shellwords.escape(value)}" }.join(' ')
   shell_command = [env_assignment, command].reject(&:empty?).join(' ')
   sh("cd #{Shellwords.escape(root)} && #{shell_command}")
