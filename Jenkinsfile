@@ -193,17 +193,24 @@ pipeline {
               }
               def bundleIdEffective = bundleIdClean
 
-              def identity = sh(
+              def identityOutput = sh(
                 script: '''
                   set -euo pipefail
                   KEYCHAIN_PATH="$HOME/Library/Keychains/$KEYCHAIN_NAME"
-                  security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk -F'"' '/"/ {print $2}' | head -n 1
+                  security find-identity -v -p codesigning "$KEYCHAIN_PATH" || true
                 ''',
                 returnStdout: true
-              ).trim()
+              )
+
+              def identity = identityOutput.readLines()
+                .collect { line ->
+                  def matcher = (line =~ /"([^"]+)"/)
+                  matcher ? matcher[0][1] : null
+                }
+                .find { it }
 
               if (!identity) {
-                error('No signing identity available in imported keychain')
+                error("No signing identity available in imported keychain. security output: ${identityOutput}")
               }
 
               env.IOS_TEAM_ID = teamId ?: ''
