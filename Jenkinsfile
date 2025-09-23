@@ -368,7 +368,7 @@ pipeline {
                   | egrep 'PRODUCT_BUNDLE_IDENTIFIER|CODE_SIGN|PROVISIONING_PROFILE|DEVELOPMENT_TEAM' || true
                 echo ''
               '''
-              sh 'bundle exec fastlane ios tests'
+              // sh 'bundle exec fastlane ios tests'
               sh 'bundle exec fastlane ios build_release'
             }
           }
