@@ -347,6 +347,17 @@ pipeline {
               security find-certificate -a -c "Developer ID - G2" /Library/Keychains/System.keychain || true
             '''
             dir('ios') {
+              sh '''
+                set -euo pipefail
+                echo '--- xcodebuild showBuildSettings (Release) ---'
+                xcodebuild -workspace Runner.xcworkspace \
+                  -scheme Runner \
+                  -configuration Release \
+                  -sdk iphoneos \
+                  -showBuildSettings \
+                  | egrep 'PRODUCT_BUNDLE_IDENTIFIER|CODE_SIGN|PROVISIONING_PROFILE|DEVELOPMENT_TEAM' || true
+                echo ''
+              '''
               sh 'bundle exec fastlane ios tests'
               sh 'bundle exec fastlane ios build_release'
             }
