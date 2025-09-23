@@ -1,4 +1,4 @@
-APP_BUNDLE_IDENTIFIER = com.thomas.giatocphamdinh
+APP_BUNDLE_IDENTIFIER = com.giatocphamdinh.familytree
 APP_CODE_SIGN_IDENTITY = iPhone Developer
 APP_CODE_SIGN_STYLE = Automatic
 APP_DEVELOPMENT_TEAM =

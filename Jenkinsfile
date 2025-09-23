@@ -189,7 +189,7 @@ pipeline {
               def bundleIdRaw = details[3]?.trim()
               def bundleIdClean = bundleIdRaw?.replaceAll(/^['"]/,'').replaceAll(/['"]$/,'')
               if (!bundleIdClean || bundleIdClean.contains('*')) {
-                error("Provisioning profile '${profileName ?: profileUuid}' is wildcard (${bundleIdClean ?: 'missing'}). Upload an App Store/AdHoc profile for the explicit bundle id 'com.thomas.giatocphamdinh'.")
+                error("Provisioning profile '${profileName ?: profileUuid}' is wildcard (${bundleIdClean ?: 'missing'}). Upload an App Store/AdHoc profile for the explicit bundle id 'com.giatocphamdinh.familytree'.")
               }
               def bundleIdEffective = bundleIdClean
 

@@ -1,2 +1,2 @@
-app_identifier(ENV["IOS_APP_IDENTIFIER"] || "com.thomas.giatocphamdinh")
+app_identifier(ENV["IOS_APP_IDENTIFIER"] || "com.giatocphamdinh.familytree")
 team_id(ENV["APPLE_TEAM_ID"] || "YOURTEAMID")
