@@ -188,7 +188,10 @@ pipeline {
               def profileUuid = details[2]?.trim()
               def bundleIdRaw = details[3]?.trim()
               def bundleIdClean = bundleIdRaw?.replaceAll(/^['"]/,'').replaceAll(/['"]$/,'')
-              def bundleIdEffective = (bundleIdClean && !bundleIdClean.contains('*')) ? bundleIdClean : 'com.thomas.giatocphamdinh'
+              if (!bundleIdClean || bundleIdClean.contains('*')) {
+                error("Provisioning profile '${profileName ?: profileUuid}' is wildcard (${bundleIdClean ?: 'missing'}). Upload an App Store/AdHoc profile for the explicit bundle id 'com.thomas.giatocphamdinh'.")
+              }
+              def bundleIdEffective = bundleIdClean
 
               def identity = sh(
                 script: '''
@@ -227,9 +230,6 @@ pipeline {
               ]
 
               writeFile file: 'ios/Flutter/ci_signing.xcconfig', text: signingLines.join('\n') + '\n'
-              if (bundleIdClean?.contains('*')) {
-                echo "Provisioning profile bundle id '${bundleIdClean}' is a wildcard; using '${bundleIdEffective}' for build settings"
-              }
               echo "Configured iOS signing for bundle ${bundleIdEffective} using identity '${identity}' and profile '${profileName ?: ''}'"
 
               sh '''
