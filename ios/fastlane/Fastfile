@@ -1,82 +1,52 @@
-require 'shellwords'
-
-def flutter_project_root
-  File.expand_path('../../', __dir__)
-end
-
-def run_flutter(command, env: {})
-  root = flutter_project_root
-  passthrough_keys = %w[
-    FLUTTER_XCODE_CONFIG_FILE
-    APP_BUNDLE_IDENTIFIER
-    PRODUCT_BUNDLE_IDENTIFIER
-    CODE_SIGN_IDENTITY
-    DEVELOPMENT_TEAM
-    PROVISIONING_PROFILE
-    PROVISIONING_PROFILE_SPECIFIER
-    CODE_SIGNING_ALLOWED
-    CODE_SIGNING_REQUIRED
-    CODE_SIGN_STYLE
-  ]
-  passthrough_keys.each do |key|
-    value = ENV[key]
-    next if value.to_s.empty?
-    env[key] = value unless env.key?(key)
-  end
-  env_assignment = env.map { |key, value| "#{key}=#{Shellwords.escape(value)}" }.join(' ')
-  shell_command = [env_assignment, command].reject(&:empty?).join(' ')
-  sh("cd #{Shellwords.escape(root)} && #{shell_command}")
-end
-
-def ensure_app_store_connect_api_key!
-  key_path = ENV['APPSTORE_KEY_PATH']
-  key_id = ENV['APPSTORE_KEY_ID']
-  issuer_id = ENV['APPSTORE_ISSUER_ID']
-
-  UI.user_error!("Set APPSTORE_KEY_PATH to your .p8 key file.") if key_path.to_s.empty?
-  UI.user_error!("APP Store Connect API key file not found at #{key_path}.") unless File.exist?(key_path)
-  UI.user_error!("Set APPSTORE_KEY_ID to your API key ID.") if key_id.to_s.empty?
-  UI.user_error!("Set APPSTORE_ISSUER_ID to your Issuer ID.") if issuer_id.to_s.empty?
-
-  app_store_connect_api_key(
-    key_id: key_id,
-    issuer_id: issuer_id,
-    key_filepath: key_path,
-    duration: 1200,
-    in_house: false
-  )
-end
-
 default_platform(:ios)
 
 platform :ios do
-  before_all do
-    UI.user_error!("Set DEMO_SECRET environment variable before running Fastlane.") if (ENV["DEMO_SECRET"].nil? || ENV["DEMO_SECRET"].empty?)
-    ensure_app_store_connect_api_key!
-  end
-
-  desc "Run Flutter unit tests"
-  lane :tests do
-    run_flutter('flutter test --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
-  end
-
-  desc "Build iOS debug"
-  lane :build_debug do
-    run_flutter('flutter build ios --debug --no-codesign --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
-  end
-
-  desc "Build release IPA"
-  lane :build_release do
-    run_flutter('flutter build ipa --release --dart-define=DEMO_SECRET=$DEMO_SECRET', env: { 'DEMO_SECRET' => ENV['DEMO_SECRET'] })
-  end
-
-  desc "Upload to TestFlight"
+  desc "Build and upload to TestFlight"
   lane :beta do
-    build_release
-    pilot(
-      ipa: '../build/ios/ipa/Runner.ipa',
-      skip_submission: true,
-      skip_waiting_for_build_processing: true
+    # Set signing
+    update_code_signing_settings(
+      path: "Runner.xcodeproj", # hoặc .xcworkspace nếu có
+      use_automatic_signing: false,
+      team_id: "DLX7252NAD",
+      bundle_identifier: "com.giatocphamdinh.familytree"
     )
+
+    # Import cert
+    import_certificate(
+      certificate_path: "fastlane/certs/Certificates.p12",
+      certificate_password: "Cotdinh123",
+      keychain_name: "login",
+      keychain_password: "1234"
+    )
+
+    # Install provisioning profile
+    install_provisioning_profile(path: "fastlane/profiles/GiatocphamdinhAppEco.mobileprovision")
+    sh("flutter --version")
+    sh("flutter clean")
+    sh("flutter pub get")
+    sh("flutter build ios --release --no-codesign")
+    # Build
+    build_app(
+      scheme: "Runner",
+      workspace: "./Runner.xcworkspace",
+      destination: "generic/platform=iOS",
+      sdk: "iphoneos",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "com.giatocphamdinh.familytree" => "GiatocphamdinhAppEco"
+        }
+      },
+      xcargs: "CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=DLX7252NAD CODE_SIGN_IDENTITY='Apple Distribution' PROVISIONING_PROFILE_SPECIFIER='GiatocphamdinhAppEco' IPHONEOS_DEPLOYMENT_TARGET=14.0"
+    )
+
+    # Upload using API key
+    app_store_connect_api_key(
+      key_id: "5ZBNQGXYVF",
+      issuer_id: "397aeb4e-abfe-4060-a3c9-6529c136bfb9",
+      key_filepath: "fastlane/keys/AuthKey_5ZBNQGXYVF.p8"
+    )
+
+    upload_to_testflight
   end
 end

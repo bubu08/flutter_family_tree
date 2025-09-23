@@ -1,2 +1,5 @@
-app_identifier(ENV["IOS_APP_IDENTIFIER"] || "com.giatocphamdinh.familytree")
-team_id(ENV["APPLE_TEAM_ID"] || "YOURTEAMID")
+app_identifier "com.giatocphamdinh.familytree" # bundle id
+# apple_id "your-apple-id@email.com"             # tài khoản apple
+
+itc_team_id "128129522" # App Store Connect Team ID
+team_id "DLX7252NAD"   # Developer Portal Team ID
