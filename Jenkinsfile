@@ -231,6 +231,15 @@ pipeline {
                 echo "Provisioning profile bundle id '${bundleIdClean}' is a wildcard; using '${bundleIdEffective}' for build settings"
               }
               echo "Configured iOS signing for bundle ${bundleIdEffective} using identity '${identity}' and profile '${profileName ?: ''}'"
+
+              sh '''
+                set -euo pipefail
+                KEYCHAIN_PATH="$HOME/Library/Keychains/$KEYCHAIN_NAME"
+                echo 'Active code signing identities:'
+                security find-identity -v -p codesigning "$KEYCHAIN_PATH" || true
+                echo '\nios/Flutter/ci_signing.xcconfig contents:'
+                cat ios/Flutter/ci_signing.xcconfig
+              '''
             }
           }
         }
