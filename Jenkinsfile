@@ -228,6 +228,12 @@ pipeline {
               }
 
               def signingLines = [
+                "APP_BUNDLE_IDENTIFIER = ${bundleIdEffective}",
+                "APP_CODE_SIGN_IDENTITY = ${quoteIfNeeded(identity)}",
+                'APP_CODE_SIGN_STYLE = Manual',
+                "APP_DEVELOPMENT_TEAM = ${teamId ?: ''}",
+                "APP_PROVISIONING_PROFILE = ${profileUuid ?: ''}",
+                "APP_PROVISIONING_PROFILE_SPECIFIER = ${quoteIfNeeded(profileName ?: '')}",
                 "PRODUCT_BUNDLE_IDENTIFIER = ${bundleIdEffective}",
                 "CODE_SIGN_IDENTITY = ${quoteIfNeeded(identity)}",
                 'CODE_SIGN_STYLE = Manual',
