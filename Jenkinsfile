@@ -349,11 +349,11 @@ pipeline {
             dir('ios') {
               sh '''
                 set -euo pipefail
-                echo '--- xcodebuild showBuildSettings (Release) ---'
+                echo '--- xcodebuild showBuildSettings (Release, generic iOS device) ---'
                 xcodebuild -workspace Runner.xcworkspace \
                   -scheme Runner \
                   -configuration Release \
-                  -sdk iphoneos \
+                  -destination generic/platform=iOS \
                   -showBuildSettings \
                   | egrep 'PRODUCT_BUNDLE_IDENTIFIER|CODE_SIGN|PROVISIONING_PROFILE|DEVELOPMENT_TEAM' || true
                 echo ''
