@@ -306,7 +306,8 @@ pipeline {
             'CODE_SIGN_IDENTITY=' + (env.IOS_CODE_SIGN_IDENTITY ?: 'Apple Distribution'),
             'APP_BUNDLE_IDENTIFIER=' + (env.IOS_BUNDLE_IDENTIFIER ?: ''),
             'KEYCHAIN_NAME=ios-build.keychain-db',
-            'KEYCHAIN_PASSWORD=ci-temp-pass'
+            'KEYCHAIN_PASSWORD=ci-temp-pass',
+            'FLUTTER_XCODE_CONFIG_FILE=Flutter/ci_signing.xcconfig'
           ]) {
             sh '''
               set -euo pipefail
