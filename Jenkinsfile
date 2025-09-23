@@ -187,7 +187,7 @@ pipeline {
               def profileName = details[1]?.trim()
               def profileUuid = details[2]?.trim()
               def bundleIdRaw = details[3]?.trim()
-              def bundleIdClean = bundleIdRaw?.replaceAll("^['\\"]|['\\"]\\$", '')
+              def bundleIdClean = bundleIdRaw?.replaceAll(/^['"]/,'').replaceAll(/['"]$/,'')
               def bundleIdEffective = (bundleIdClean && !bundleIdClean.contains('*')) ? bundleIdClean : 'com.thomas.giatocphamdinh'
 
               def identity = sh(
