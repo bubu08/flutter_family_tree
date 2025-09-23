@@ -186,13 +186,15 @@ pipeline {
               def teamId = details[0]?.trim()
               def profileName = details[1]?.trim()
               def profileUuid = details[2]?.trim()
-              def bundleId = details[3]?.trim()
+              def bundleIdRaw = details[3]?.trim()
+              def bundleIdClean = bundleIdRaw?.replaceAll("^['\"]|['\"]$", '')
+              def bundleIdEffective = (bundleIdClean && !bundleIdClean.contains('*')) ? bundleIdClean : 'com.thomas.giatocphamdinh'
 
               def identity = sh(
                 script: '''
                   set -euo pipefail
                   KEYCHAIN_PATH="$HOME/Library/Keychains/$KEYCHAIN_NAME"
-                  security find-identity -v -p codesign "$KEYCHAIN_PATH" | awk -F'"' '/"/ {print $2}' | head -n 1
+                  security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk -F'"' '/"/ {print $2}' | head -n 1
                 ''',
                 returnStdout: true
               ).trim()
@@ -204,7 +206,7 @@ pipeline {
               env.IOS_TEAM_ID = teamId ?: ''
               env.IOS_PROFILE_NAME = profileName ?: ''
               env.IOS_PROFILE_UUID = profileUuid ?: ''
-              env.IOS_BUNDLE_IDENTIFIER = bundleId ?: ''
+              env.IOS_BUNDLE_IDENTIFIER = bundleIdEffective
               env.IOS_CODE_SIGN_IDENTITY = identity
 
               def quoteIfNeeded = { value ->
@@ -216,7 +218,7 @@ pipeline {
               }
 
               def signingLines = [
-                "APP_BUNDLE_IDENTIFIER = ${bundleId ?: 'com.thomas.giatocphamdinh'}",
+                "APP_BUNDLE_IDENTIFIER = ${bundleIdEffective}",
                 "APP_CODE_SIGN_IDENTITY = ${quoteIfNeeded(identity)}",
                 'APP_CODE_SIGN_STYLE = Manual',
                 "APP_DEVELOPMENT_TEAM = ${teamId ?: ''}",
@@ -225,7 +227,10 @@ pipeline {
               ]
 
               writeFile file: 'ios/Flutter/ci_signing.xcconfig', text: signingLines.join('\n') + '\n'
-              echo "Configured iOS signing for bundle ${bundleId ?: 'com.thomas.giatocphamdinh'} using identity '${identity}' and profile '${profileName ?: ''}'"
+              if (bundleIdClean?.contains('*')) {
+                echo "Provisioning profile bundle id '${bundleIdClean}' is a wildcard; using '${bundleIdEffective}' for build settings"
+              }
+              echo "Configured iOS signing for bundle ${bundleIdEffective} using identity '${identity}' and profile '${profileName ?: ''}'"
             }
           }
         }
