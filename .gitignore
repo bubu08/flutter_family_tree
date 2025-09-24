@@ -52,3 +52,6 @@ ios/Runner/GoogleService-Info.plist
 ios/Flutter/ci_signing.xcconfig
 ios/fastlane/build/*
 ios/build/
+ios/Runner.ipa
+ios/Runner.app.*
+

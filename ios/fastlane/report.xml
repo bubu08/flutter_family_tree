@@ -5,49 +5,59 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000393">
+      <testcase classname="fastlane.lanes" name="00: default_platform" time="0.000352">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: update_code_signing_settings" time="0.107674">
+      <testcase classname="fastlane.lanes" name="01: update_code_signing_settings" time="0.089892">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: import_certificate" time="0.197976">
+      <testcase classname="fastlane.lanes" name="02: import_certificate" time="0.185518">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: install_provisioning_profile" time="0.109402">
+      <testcase classname="fastlane.lanes" name="03: install_provisioning_profile" time="0.109271">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: flutter --version" time="0.676069">
+      <testcase classname="fastlane.lanes" name="04: flutter --version" time="0.723565">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="5: flutter clean" time="14.798303">
+      <testcase classname="fastlane.lanes" name="05: flutter clean" time="11.512125">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="6: flutter pub get" time="10.290662">
+      <testcase classname="fastlane.lanes" name="06: flutter pub get" time="8.411318">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="7: flutter build ios --release --no-codesign" time="495.120682">
+      <testcase classname="fastlane.lanes" name="07: flutter build ios --release --no-codesign" time="529.769853">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="8: build_app" time="449.515304">
+      <testcase classname="fastlane.lanes" name="08: build_app" time="508.86721">
         
-          <failure message="/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in `execute_action&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:255:in `block in execute_action&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:229:in `chdir&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:229:in `execute_action&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:157:in `trigger_action_by_name&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/fast_file.rb:159:in `method_missing&apos;&#10;Fastfile:29:in `block (2 levels) in parsing_binding&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/lane.rb:41:in `call&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:49:in `block in execute&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:45:in `chdir&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:45:in `execute&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/lane_manager.rb:46:in `cruise_lane&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/command_line_handler.rb:34:in `handle&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/commands_generator.rb:110:in `block (2 levels) in run&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/command.rb:187:in `call&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/command.rb:157:in `run&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in `run_active_command&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in `run!&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in `run!&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/commands_generator.rb:363:in `run&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/commands_generator.rb:43:in `start&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in `take_off&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/bin/fastlane:23:in `&lt;top (required)&gt;&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/bin/fastlane:25:in `load&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/bin/fastlane:25:in `&lt;main&gt;&apos;&#10;&#10;Error packaging up the application" />
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="09: app_store_connect_api_key" time="0.011877">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="10: upload_to_testflight" time="277.587795">
+        
+          <failure message="/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in `execute_action&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:255:in `block in execute_action&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:229:in `chdir&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:229:in `execute_action&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:157:in `trigger_action_by_name&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/fast_file.rb:159:in `method_missing&apos;&#10;Fastfile:50:in `block (2 levels) in parsing_binding&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/lane.rb:41:in `call&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:49:in `block in execute&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:45:in `chdir&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/runner.rb:45:in `execute&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/lane_manager.rb:46:in `cruise_lane&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/command_line_handler.rb:34:in `handle&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/commands_generator.rb:110:in `block (2 levels) in run&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/command.rb:187:in `call&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/command.rb:157:in `run&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in `run_active_command&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in `run!&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in `run!&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/commands_generator.rb:363:in `run&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/commands_generator.rb:43:in `start&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in `take_off&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/lib/ruby/gems/3.2.0/gems/fastlane-2.228.0/bin/fastlane:23:in `&lt;top (required)&gt;&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/bin/fastlane:25:in `load&apos;&#10;/Users/thangpd/.rbenv/versions/3.2.4/bin/fastlane:25:in `&lt;main&gt;&apos;&#10;&#10;This request is forbidden for security reasons - The API key in use does not allow this request" />
         
       </testcase>
     
