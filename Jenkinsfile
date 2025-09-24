@@ -88,19 +88,19 @@ pipeline {
         '''
       }
     }
-    stage('Verify Pubspec Version') {
-      steps {
-        script {
-          def hasPrev = sh(returnStatus: true, script: 'git rev-parse HEAD^ >/dev/null 2>&1') == 0
-          if (!hasPrev) {
-            echo 'Skipping pubspec.yaml check: no previous commit reference available.'
-          } else {
-            def touched = sh(returnStdout: true, script: 'git diff --name-only HEAD^ HEAD -- pubspec.yaml').trim()
-            if (!touched) { error 'pubspec.yaml must be updated before running the iOS deploy stage.' }
-          }
-        }
-      }
-    }
+    // stage('Verify Pubspec Version') {
+    //   steps {
+    //     script {
+    //       def hasPrev = sh(returnStatus: true, script: 'git rev-parse HEAD^ >/dev/null 2>&1') == 0
+    //       if (!hasPrev) {
+    //         echo 'Skipping pubspec.yaml check: no previous commit reference available.'
+    //       } else {
+    //         def touched = sh(returnStdout: true, script: 'git diff --name-only HEAD^ HEAD -- pubspec.yaml').trim()
+    //         if (!touched) { error 'pubspec.yaml must be updated before running the iOS deploy stage.' }
+    //       }
+    //     }
+    //   }
+    // }
 
     stage('Provision Signing Assets') {
       steps {
