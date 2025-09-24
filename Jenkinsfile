@@ -1,27 +1,38 @@
 pipeline {
-  agent { label 'mac || built-in || master' }
+  agent { label 'mac || built-in || master' } // ok if you really have these labels
 
   environment {
     LANG = 'en_US.UTF-8'
     LC_ALL = 'en_US.UTF-8'
     KEYCHAIN_NAME = 'fastlane-ci.keychain-db'
+    KEYCHAIN_PATH = "${env.HOME}/Library/Keychains/${KEYCHAIN_NAME}"
   }
 
-  options {
-    timestamps()
-  }
+  options { timestamps() }
 
   stages {
-    stage('Checkout') {
+    stage('RVM Warmup') {
       steps {
-        checkout scm
+        sh '''#!/bin/bash -l
+          set -euo pipefail
+          source /Library/Jenkins/.rvm/scripts/rvm
+          rvm use 3.2.4@ios --create
+          ruby -v
+          which ruby
+          gem env home
+        '''
       }
+    }
+
+    stage('Checkout') {
+      steps { checkout scm }
     }
 
     stage('Flutter Dependencies') {
       steps {
-        sh '''
+        sh '''#!/bin/bash -l
           set -euo pipefail
+          which flutter || true
           flutter --version
           flutter pub get
         '''
@@ -30,25 +41,21 @@ pipeline {
 
     stage('Bundle Install') {
       steps {
-        script {
-          def rubyVersion = sh(
-            script: "ruby -rrbconfig -e 'print RbConfig::CONFIG[\"ruby_version\"]'",
-            returnStdout: true
-          ).trim()
-          env.RUBY_VERSION = rubyVersion
-          def gemHome = "${env.WORKSPACE}/.gem/ruby/${rubyVersion}"
-          env.GEM_HOME = gemHome
-          env.GEM_PATH = gemHome
-          env.PATH = "${gemHome}/bin:${env.PATH}"
-        }
-        sh '''
+        sh '''#!/bin/bash -l
           set -euo pipefail
-          mkdir -p "$GEM_HOME/bin"
-          if ! bundle --version >/dev/null 2>&1; then
-            gem install bundler --no-document --install-dir "$GEM_HOME" --bindir "$GEM_HOME/bin"
+          source /Library/Jenkins/.rvm/scripts/rvm
+          rvm use 3.2.4@ios --create
+          # Respect Gemfile.lock bundler if present; otherwise install/update bundler
+          BUNDLER_VERSION="$(awk '/^BUNDLED WITH$/{getline; gsub(/^[\\t ]+/,\"\"); print; exit}' Gemfile.lock || true)"
+          if [ -n "${BUNDLER_VERSION:-}" ]; then
+            if ! bundle --version 2>/dev/null | grep -F "$BUNDLER_VERSION" >/dev/null 2>&1; then
+              gem install bundler --no-document --version "$BUNDLER_VERSION"
+            fi
+          else
+            gem install bundler --no-document
           fi
-          bundle config set --local path vendor/bundle
-          bundle install
+          bundle config set path vendor/bundle
+          bundle install --jobs 4 --retry 3
         '''
       }
     }
@@ -56,24 +63,12 @@ pipeline {
     stage('Verify Pubspec Version') {
       steps {
         script {
-          def previousCommit = sh(
-            script: 'git rev-parse HEAD^ 2>/dev/null',
-            returnStatus: true
-          ) == 0 ? sh(
-            script: 'git rev-parse HEAD^',
-            returnStdout: true
-          ).trim() : null
-
-          if (!previousCommit) {
+          def hasPrev = sh(returnStatus: true, script: 'git rev-parse HEAD^ >/dev/null 2>&1') == 0
+          if (!hasPrev) {
             echo 'Skipping pubspec.yaml check: no previous commit reference available.'
           } else {
-            def pubspecTouched = sh(
-              script: "git diff --name-only ${previousCommit} HEAD -- pubspec.yaml",
-              returnStdout: true
-            ).trim()
-            if (!pubspecTouched) {
-              error 'pubspec.yaml must be updated before running the iOS deploy stage.'
-            }
+            def touched = sh(returnStdout: true, script: 'git diff --name-only HEAD^ HEAD -- pubspec.yaml').trim()
+            if (!touched) { error 'pubspec.yaml must be updated before running the iOS deploy stage.' }
           }
         }
       }
@@ -92,7 +87,7 @@ pipeline {
           string(credentialsId: 'appstore-key-id', variable: 'APPSTORE_KEY_ID_SECRET'),
           string(credentialsId: 'appstore-issuer-id', variable: 'APPSTORE_ISSUER_ID_SECRET')
         ]) {
-          sh '''
+          sh '''#!/bin/bash -l
             set -euo pipefail
             install -d ios/fastlane/certs ios/fastlane/profiles ios/fastlane/keys
             install -m 0600 "$IOS_CERT_FILE" ios/fastlane/certs/Certificates.p12
@@ -103,37 +98,30 @@ pipeline {
             install -m 0644 "$FIREBASE_ANDROID_CONFIG" android/app/google-services.json
           '''
           script {
-            def keychainSecret = IOS_KEYCHAIN_PASSWORD_SECRET?.trim()
-            if (!keychainSecret) {
-              keychainSecret = java.util.UUID.randomUUID().toString()
+            def kcSecret = IOS_KEYCHAIN_PASSWORD_SECRET?.trim()
+            if (!kcSecret) {
+              kcSecret = java.util.UUID.randomUUID().toString()
               echo 'ios-keychain-password credential was blank; generated a temporary password for this build.'
             }
-
             env.IOS_CERT_PASSWORD = IOS_CERT_PASSWORD_SECRET
-            env.KEYCHAIN_PASSWORD = keychainSecret
-            env.APPSTORE_KEY_ID = APPSTORE_KEY_ID_SECRET
-            env.APPSTORE_ISSUER_ID = APPSTORE_ISSUER_ID_SECRET
+            env.KEYCHAIN_PASSWORD = kcSecret
+            env.APPSTORE_KEY_ID   = APPSTORE_KEY_ID_SECRET
+            env.APPSTORE_ISSUER_ID= APPSTORE_ISSUER_ID_SECRET
             env.APPSTORE_KEY_PATH = 'ios/fastlane/keys/AuthKey_5ZBNQGXYVF.p8'
-            env.IOS_PROFILE_PATH = 'ios/fastlane/profiles/GiatocphamdinhAppEco.mobileprovision'
-            env.FLUTTER_FIREBASE_CONFIG_PATH = 'ios/Runner/GoogleService-Info.plist'
-            env.ANDROID_FIREBASE_CONFIG_PATH = 'android/app/google-services.json'
+            env.IOS_PROFILE_PATH  = 'ios/fastlane/profiles/GiatocphamdinhAppEco.mobileprovision'
           }
-          sh '''
+          sh '''#!/bin/bash -l
             set -euo pipefail
-            KEYCHAIN_PATH="$HOME/Library/Keychains/${KEYCHAIN_NAME}"
+            # Create and set default keychain (use full path)
             security delete-keychain "$KEYCHAIN_PATH" || true
-            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
-            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
-            security set-keychain-settings -lut 21600 "$KEYCHAIN_NAME"
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
             security import ios/fastlane/certs/Certificates.p12 \
-              -k "$KEYCHAIN_PATH" \
-              -P "$IOS_CERT_PASSWORD" \
-              -T /usr/bin/codesign \
-              -T /usr/bin/productbuild \
-              -T /usr/bin/productsign \
-              -T /usr/bin/security
+              -k "$KEYCHAIN_PATH" -P "$IOS_CERT_PASSWORD" \
+              -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
             security list-keychains -s "$KEYCHAIN_PATH"
-            security default-keychain -s "$KEYCHAIN_NAME"
+            security default-keychain -s "$KEYCHAIN_PATH"
           '''
         }
       }
@@ -146,8 +134,10 @@ pipeline {
           'FLUTTER_FIREBASE_CONFIG_PATH=ios/Runner/GoogleService-Info.plist',
           'ANDROID_FIREBASE_CONFIG_PATH=android/app/google-services.json'
         ]) {
-          sh '''
+          sh '''#!/bin/bash -l
             set -euo pipefail
+            source /Library/Jenkins/.rvm/scripts/rvm
+            rvm use 3.2.4@ios
             bundle exec fastlane ios beta
           '''
         }
@@ -157,9 +147,8 @@ pipeline {
 
   post {
     always {
-      sh '''
+      sh '''#!/bin/bash -l
         set +e
-        KEYCHAIN_PATH="$HOME/Library/Keychains/${KEYCHAIN_NAME}"
         security delete-keychain "$KEYCHAIN_PATH" || true
       '''
     }
