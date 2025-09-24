@@ -41,6 +41,32 @@ pipeline {
       }
     }
 
+    stage('Verify Pubspec Version') {
+      steps {
+        script {
+          def previousCommit = sh(
+            script: 'git rev-parse HEAD^ 2>/dev/null',
+            returnStatus: true
+          ) == 0 ? sh(
+            script: 'git rev-parse HEAD^',
+            returnStdout: true
+          ).trim() : null
+
+          if (!previousCommit) {
+            echo 'Skipping pubspec.yaml check: no previous commit reference available.'
+          } else {
+            def pubspecTouched = sh(
+              script: "git diff --name-only ${previousCommit} HEAD | grep -E '^pubspec\\.yaml$' || true",
+              returnStdout: true
+            ).trim()
+            if (!pubspecTouched) {
+              error 'pubspec.yaml must be updated before running the iOS deploy stage.'
+            }
+          }
+        }
+      }
+    }
+
     stage('Provision Signing Assets') {
       steps {
         withCredentials([
