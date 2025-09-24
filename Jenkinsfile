@@ -30,10 +30,21 @@ pipeline {
 
     stage('Bundle Install') {
       steps {
+        script {
+          def rubyVersion = sh(
+            script: "ruby -rrbconfig -e 'print RbConfig::CONFIG[\"ruby_version\"]'",
+            returnStdout: true
+          ).trim()
+          env.RUBY_VERSION = rubyVersion
+          env.GEM_HOME = "${env.HOME}/.gem/ruby/${rubyVersion}"
+          env.GEM_PATH = env.GEM_HOME
+          env.PATH = "${env.GEM_HOME}/bin:${env.PATH}"
+        }
         sh '''
           set -euo pipefail
-          if ! command -v bundle >/dev/null; then
-            gem install bundler --no-document
+          mkdir -p "$GEM_HOME"
+          if ! bundle --version >/dev/null 2>&1; then
+            gem install bundler --no-document --user-install
           fi
           bundle config set --local path vendor/bundle
           bundle install
