@@ -44,9 +44,12 @@ pipeline {
     stage('Bundle Install') {
       steps {
         sh '''#!/bin/bash -l
-          set -euo pipefail
+          set -eo pipefail
+          set +u
           source /Library/Jenkins/.rvm/scripts/rvm
           rvm use 3.2.4@ios --create
+          set -u
+
           # Respect Gemfile.lock bundler if present; otherwise install/update bundler
           BUNDLER_VERSION="$(awk '/^BUNDLED WITH$/{getline; gsub(/^[\\t ]+/,\"\"); print; exit}' Gemfile.lock || true)"
           if [ -n "${BUNDLER_VERSION:-}" ]; then
@@ -61,7 +64,18 @@ pipeline {
         '''
       }
     }
-
+    stages {
+        stage('Sanity') {
+          steps {
+            sh '''
+              which ruby && ruby -v
+              which bundle && bundle --version
+              which fastlane && fastlane --version
+              which flutter && flutter --version
+            '''
+          }
+        }
+      }
     stage('Verify Pubspec Version') {
       steps {
         script {
@@ -137,9 +151,11 @@ pipeline {
           'ANDROID_FIREBASE_CONFIG_PATH=android/app/google-services.json'
         ]) {
           sh '''#!/bin/bash -l
-            set -euo pipefail
+            set -eo pipefail
+            set +u
             source /Library/Jenkins/.rvm/scripts/rvm
             rvm use 3.2.4@ios
+            set -u
             bundle exec fastlane ios beta
           '''
         }
