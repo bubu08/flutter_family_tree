@@ -44,16 +44,6 @@ pipeline {
       steps { checkout scm }
     }
 
-    stage('Flutter Dependencies') {
-      steps {
-        sh '''#!/bin/bash -l
-          set -euo pipefail
-          which flutter || true
-          flutter --version
-          flutter pub get
-        '''
-      }
-    }
 
     stage('Bundle Install') {
       steps {
