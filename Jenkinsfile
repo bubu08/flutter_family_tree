@@ -11,6 +11,10 @@ pipeline {
   options { timestamps() }
 
   stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
     stage('Flutter Dependencies') {
       steps {
         sh '''#!/bin/bash -l
@@ -37,12 +41,6 @@ pipeline {
         '''
       }
     }
-
-    stage('Checkout') {
-      steps { checkout scm }
-    }
-
-
     stage('Bundle Install') {
       steps {
         sh '''#!/bin/bash -l
