@@ -30,6 +30,7 @@ pipeline {
         '''
       }
     }
+
     stage('RVM Warmup') {
       steps {
         sh '''#!/bin/bash -l
@@ -41,6 +42,7 @@ pipeline {
         '''
       }
     }
+
     stage('Bundle Install') {
       steps {
         sh '''#!/bin/bash -l
@@ -64,18 +66,18 @@ pipeline {
         '''
       }
     }
-    stages {
-        stage('Sanity') {
-          steps {
-            sh '''
-              which ruby && ruby -v
-              which bundle && bundle --version
-              which fastlane && fastlane --version
-              which flutter && flutter --version
-            '''
-          }
-        }
+
+    stage('Sanity') {
+      steps {
+        sh '''#!/bin/bash -l
+          set -eo pipefail
+          which ruby && ruby -v
+          which bundle && bundle --version
+          which fastlane && fastlane --version
+          which flutter && flutter --version
+        '''
       }
+    }
     stage('Verify Pubspec Version') {
       steps {
         script {
