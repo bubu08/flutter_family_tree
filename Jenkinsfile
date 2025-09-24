@@ -71,9 +71,19 @@ pipeline {
       steps {
         sh '''#!/bin/bash -l
           set -eo pipefail
+          set +u
+          source /Library/Jenkins/.rvm/scripts/rvm
+          rvm use 3.2.4@ios
+          set -u
+
           which ruby && ruby -v
           which bundle && bundle --version
-          which fastlane && fastlane --version
+
+          # show gem fastlane and flutter
+          bundle exec fastlane --version || true
+
+          export FLUTTER_SDK="/Library/Jenkins/flutter"
+          export PATH="$FLUTTER_SDK/bin:$PATH"
           which flutter && flutter --version
         '''
       }
@@ -154,6 +164,8 @@ pipeline {
         ]) {
           sh '''#!/bin/bash -l
             set -eo pipefail
+            export FLUTTER_SDK="/Library/Jenkins/flutter"
+            export PATH="$FLUTTER_SDK/bin:$PATH"
             set +u
             source /Library/Jenkins/.rvm/scripts/rvm
             rvm use 3.2.4@ios
