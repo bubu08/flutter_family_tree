@@ -36,15 +36,16 @@ pipeline {
             returnStdout: true
           ).trim()
           env.RUBY_VERSION = rubyVersion
-          env.GEM_HOME = "${env.HOME}/.gem/ruby/${rubyVersion}"
-          env.GEM_PATH = env.GEM_HOME
-          env.PATH = "${env.GEM_HOME}/bin:${env.PATH}"
+          def gemHome = "${env.WORKSPACE}/.gem/ruby/${rubyVersion}"
+          env.GEM_HOME = gemHome
+          env.GEM_PATH = gemHome
+          env.PATH = "${gemHome}/bin:${env.PATH}"
         }
         sh '''
           set -euo pipefail
-          mkdir -p "$GEM_HOME"
+          mkdir -p "$GEM_HOME/bin"
           if ! bundle --version >/dev/null 2>&1; then
-            gem install bundler --no-document --user-install
+            gem install bundler --no-document --install-dir "$GEM_HOME" --bindir "$GEM_HOME/bin"
           fi
           bundle config set --local path vendor/bundle
           bundle install
