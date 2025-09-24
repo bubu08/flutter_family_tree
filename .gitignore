@@ -50,3 +50,5 @@ android/app/google-services.json
 
 ios/Runner/GoogleService-Info.plist
 ios/Flutter/ci_signing.xcconfig
+ios/fastlane/build/*
+ios/build/

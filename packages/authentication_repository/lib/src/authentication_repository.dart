@@ -27,7 +27,8 @@ class AuthenticationRepository {
     GoogleSignIn? googleSignIn,
   }) {
     _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance;
-    _googleSignIn = googleSignIn ?? GoogleSignIn.standard();
+    _googleSignIn = googleSignIn ?? GoogleSignIn.instance;
+    _shouldInitializeGoogleSignIn = googleSignIn == null;
     _currentUser = User.empty;
     _currentUserUid = '';
 
@@ -39,6 +40,8 @@ class AuthenticationRepository {
 
   late firebase_auth.FirebaseAuth _firebaseAuth;
   late GoogleSignIn _googleSignIn;
+  late final bool _shouldInitializeGoogleSignIn;
+  Future<void>? _googleSignInInitialization;
 
   late User _currentUser;
   late String _currentUserUid;
@@ -83,12 +86,15 @@ class AuthenticationRepository {
   /// Throws a [LogInWithGoogleFailure] if an exception occurs.
   Future<void> logInWithGoogle() async {
     try {
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) throw LogInWithGoogleFailure();
-      final googleAuth = await googleUser.authentication;
+      await _ensureGoogleSignInInitialized();
+      final googleUser = await _googleSignIn.authenticate();
+      final googleAuth = googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null || idToken.isEmpty) {
+        throw LogInWithGoogleFailure();
+      }
       final credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        idToken: idToken,
       );
       await _firebaseAuth.signInWithCredential(credential);
     } on Exception {
@@ -119,10 +125,20 @@ class AuthenticationRepository {
   /// Throws a [LogOutFailure] if an exception occurs.
   Future<void> logOut() async {
     try {
-      await Future.wait([_firebaseAuth.signOut(), _googleSignIn.signOut()]);
+      await _firebaseAuth.signOut();
+      await _ensureGoogleSignInInitialized();
+      await _googleSignIn.signOut();
     } on Exception {
       throw LogOutFailure();
     }
+  }
+
+  Future<void> _ensureGoogleSignInInitialized() {
+    if (!_shouldInitializeGoogleSignIn) {
+      return Future.value();
+    }
+    return _googleSignInInitialization ??=
+        _googleSignIn.initialize();
   }
 }
 

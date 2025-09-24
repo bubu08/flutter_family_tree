@@ -53,7 +53,7 @@ def flutter_additional_ios_build_settings(target)
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
-  artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
+  artifacts_dir = flutter_engine_artifacts_dir
   debug_framework_dir = File.expand_path(File.join(artifacts_dir, 'ios', 'Flutter.xcframework'), __FILE__)
 
   unless Dir.exist?(debug_framework_dir)
@@ -401,4 +401,26 @@ def flutter_get_local_engine_dir(xcconfig_file)
     return File.join(base_dir, 'out', local_engine)
   end
   return nil
+end
+
+def flutter_engine_artifacts_dir
+  return @flutter_engine_artifacts_dir if defined?(@flutter_engine_artifacts_dir) && @flutter_engine_artifacts_dir
+
+  flutter_root = ENV['FLUTTER_ROOT']
+
+  if flutter_root.nil? || flutter_root.empty?
+    generated_xcconfig = File.expand_path(File.join('..', 'Generated.xcconfig'), __FILE__)
+    config = flutter_parse_xcconfig_file(generated_xcconfig)
+    if config.is_a?(Hash)
+      flutter_root = config['FLUTTER_ROOT']
+    end
+  end
+
+  if flutter_root.nil? || flutter_root.empty?
+    @flutter_engine_artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
+  else
+    @flutter_engine_artifacts_dir = File.expand_path(File.join(flutter_root, 'bin', 'cache', 'artifacts', 'engine'))
+  end
+
+  @flutter_engine_artifacts_dir
 end
