@@ -14,12 +14,11 @@ pipeline {
     stage('RVM Warmup') {
       steps {
         sh '''#!/bin/bash -l
-          set -euo pipefail
+          set -eo pipefail          # no -u yet
+          set +u                    # allow unset vars while sourcing RVM
           source /Library/Jenkins/.rvm/scripts/rvm
           rvm use 3.2.4@ios --create
-          ruby -v
-          which ruby
-          gem env home
+          set -u
         '''
       }
     }
