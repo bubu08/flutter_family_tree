@@ -10,6 +10,7 @@ pipeline {
 
   options { timestamps() }
 
+  stages {
     stage('Flutter Dependencies') {
       steps {
         sh '''#!/bin/bash -l
