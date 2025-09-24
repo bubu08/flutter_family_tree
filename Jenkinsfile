@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'mac' }
+  agent { label 'mac || built-in || master' }
 
   environment {
     LANG = 'en_US.UTF-8'
