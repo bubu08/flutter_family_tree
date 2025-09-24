@@ -74,6 +74,8 @@ pipeline {
           string(credentialsId: 'ios-cert-password', variable: 'IOS_CERT_PASSWORD_SECRET'),
           file(credentialsId: 'ios-profile', variable: 'IOS_PROFILE_FILE'),
           file(credentialsId: 'ios-api-key', variable: 'IOS_API_KEY_FILE'),
+          file(credentialsId: 'firebase-ios-config', variable: 'FIREBASE_IOS_CONFIG'),
+          file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG'),
           string(credentialsId: 'ios-keychain-password', variable: 'IOS_KEYCHAIN_PASSWORD_SECRET'),
           string(credentialsId: 'appstore-key-id', variable: 'APPSTORE_KEY_ID_SECRET'),
           string(credentialsId: 'appstore-issuer-id', variable: 'APPSTORE_ISSUER_ID_SECRET')
@@ -84,14 +86,25 @@ pipeline {
             install -m 0600 "$IOS_CERT_FILE" ios/fastlane/certs/Certificates.p12
             install -m 0644 "$IOS_PROFILE_FILE" ios/fastlane/profiles/GiatocphamdinhAppEco.mobileprovision
             install -m 0600 "$IOS_API_KEY_FILE" ios/fastlane/keys/AuthKey_5ZBNQGXYVF.p8
+            install -m 0600 "$FIREBASE_IOS_CONFIG" ios/Runner/GoogleService-Info.plist
+            install -d android/app
+            install -m 0644 "$FIREBASE_ANDROID_CONFIG" android/app/google-services.json
           '''
           script {
+            def keychainSecret = IOS_KEYCHAIN_PASSWORD_SECRET?.trim()
+            if (!keychainSecret) {
+              keychainSecret = java.util.UUID.randomUUID().toString()
+              echo 'ios-keychain-password credential was blank; generated a temporary password for this build.'
+            }
+
             env.IOS_CERT_PASSWORD = IOS_CERT_PASSWORD_SECRET
-            env.KEYCHAIN_PASSWORD = IOS_KEYCHAIN_PASSWORD_SECRET
+            env.KEYCHAIN_PASSWORD = keychainSecret
             env.APPSTORE_KEY_ID = APPSTORE_KEY_ID_SECRET
             env.APPSTORE_ISSUER_ID = APPSTORE_ISSUER_ID_SECRET
             env.APPSTORE_KEY_PATH = 'ios/fastlane/keys/AuthKey_5ZBNQGXYVF.p8'
             env.IOS_PROFILE_PATH = 'ios/fastlane/profiles/GiatocphamdinhAppEco.mobileprovision'
+            env.FLUTTER_FIREBASE_CONFIG_PATH = 'ios/Runner/GoogleService-Info.plist'
+            env.ANDROID_FIREBASE_CONFIG_PATH = 'android/app/google-services.json'
           }
           sh '''
             set -euo pipefail
@@ -116,7 +129,11 @@ pipeline {
 
     stage('Fastlane iOS Beta') {
       steps {
-        withEnv(['FASTLANE_SKIP_UPDATE_CHECK=true']) {
+        withEnv([
+          'FASTLANE_SKIP_UPDATE_CHECK=true',
+          'FLUTTER_FIREBASE_CONFIG_PATH=ios/Runner/GoogleService-Info.plist',
+          'ANDROID_FIREBASE_CONFIG_PATH=android/app/google-services.json'
+        ]) {
           sh '''
             set -euo pipefail
             bundle exec fastlane ios beta
