@@ -56,7 +56,7 @@ pipeline {
             echo 'Skipping pubspec.yaml check: no previous commit reference available.'
           } else {
             def pubspecTouched = sh(
-              script: "git diff --name-only ${previousCommit} HEAD | grep -E '^pubspec\\.yaml$' || true",
+              script: "git diff --name-only ${previousCommit} HEAD -- pubspec.yaml",
               returnStdout: true
             ).trim()
             if (!pubspecTouched) {
