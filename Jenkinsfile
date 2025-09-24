@@ -11,6 +11,23 @@ pipeline {
   options { timestamps() }
 
   stages {
+    stage('Flutter Dependencies') {
+      steps {
+        sh '''#!/bin/bash -l
+          set -eo pipefail
+          # allow flutter’s git repo for the jenkins user
+          git config --global --add safe.directory /usr/local/share/flutter || true
+
+          # (optional) make sure pub cache is in jenkins HOME and writeable
+          export PUB_CACHE="$HOME/.pub-cache"
+          mkdir -p "$PUB_CACHE"
+
+          which flutter || true
+          flutter --version
+          flutter pub get
+        '''
+      }
+    }
     stage('RVM Warmup') {
       steps {
         sh '''#!/bin/bash -l
