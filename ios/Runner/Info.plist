@@ -56,5 +56,20 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to upload profile pictures and family photos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to your camera to take photos for your family tree.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This app does not track you.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app does not use your location.</string>
 </dict>
 </plist>

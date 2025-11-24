@@ -104,53 +104,91 @@ pipeline {
 
     stage('Provision Signing Assets') {
       steps {
-        withCredentials([
-          file(credentialsId: 'ios-cert-p12', variable: 'IOS_CERT_FILE'),
-          string(credentialsId: 'ios-cert-password', variable: 'IOS_CERT_PASSWORD_SECRET'),
-          file(credentialsId: 'ios-profile', variable: 'IOS_PROFILE_FILE'),
-          file(credentialsId: 'ios-api-key', variable: 'IOS_API_KEY_FILE'),
-          file(credentialsId: 'firebase-ios-config', variable: 'FIREBASE_IOS_CONFIG'),
-          file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG'),
-          string(credentialsId: 'ios-keychain-password', variable: 'IOS_KEYCHAIN_PASSWORD_SECRET'),
-          string(credentialsId: 'appstore-key-id', variable: 'APPSTORE_KEY_ID_SECRET'),
-          string(credentialsId: 'appstore-issuer-id', variable: 'APPSTORE_ISSUER_ID_SECRET')
-        ]) {
-          sh '''#!/bin/bash -l
-            set -euo pipefail
-            install -d ios/fastlane/certs ios/fastlane/profiles ios/fastlane/keys
-            install -m 0600 "$IOS_CERT_FILE" ios/fastlane/certs/Certificates.p12
-            install -m 0644 "$IOS_PROFILE_FILE" ios/fastlane/profiles/GiatocphamdinhAppEco.mobileprovision
-            install -m 0600 "$IOS_API_KEY_FILE" ios/fastlane/keys/AuthKey_5ZBNQGXYVF.p8
-            install -m 0600 "$FIREBASE_IOS_CONFIG" ios/Runner/GoogleService-Info.plist
-            install -d android/app
-            install -m 0644 "$FIREBASE_ANDROID_CONFIG" android/app/google-services.json
-          '''
-          script {
+        script {
+          def profileCredentialId = env.IOS_PROFILE_CREDENTIAL_ID?.trim()
+          if (!profileCredentialId) {
+            profileCredentialId = 'ios-profile'
+          }
+
+          withCredentials([
+            file(credentialsId: 'ios-cert-p12', variable: 'IOS_CERT_FILE'),
+            string(credentialsId: 'ios-cert-password', variable: 'IOS_CERT_PASSWORD_SECRET'),
+            file(credentialsId: profileCredentialId, variable: 'IOS_PROFILE_FILE'),
+            file(credentialsId: 'appstore-ios-api-key-file', variable: 'IOS_API_KEY_FILE'),
+            file(credentialsId: 'firebase-ios-config', variable: 'FIREBASE_IOS_CONFIG'),
+            file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG'),
+            string(credentialsId: 'ios-keychain-password', variable: 'IOS_KEYCHAIN_PASSWORD_SECRET'),
+            string(credentialsId: 'appstore-key-id', variable: 'APPSTORE_KEY_ID_SECRET'),
+            string(credentialsId: 'appstore-issuer-id', variable: 'APPSTORE_ISSUER_ID_SECRET')
+          ]) {
             def kcSecret = IOS_KEYCHAIN_PASSWORD_SECRET?.trim()
             if (!kcSecret) {
               kcSecret = java.util.UUID.randomUUID().toString()
               echo 'ios-keychain-password credential was blank; generated a temporary password for this build.'
             }
+
             env.IOS_CERT_PASSWORD = IOS_CERT_PASSWORD_SECRET
             env.KEYCHAIN_PASSWORD = kcSecret
             env.APPSTORE_KEY_ID   = APPSTORE_KEY_ID_SECRET
             env.APPSTORE_ISSUER_ID= APPSTORE_ISSUER_ID_SECRET
             env.APPSTORE_KEY_PATH = 'ios/fastlane/keys/AuthKey_5ZBNQGXYVF.p8'
-            env.IOS_PROFILE_PATH  = 'ios/fastlane/profiles/GiatocphamdinhAppEco.mobileprovision'
+
+            env.FLUTTER_FIREBASE_CONFIG_PATH = (env.FLUTTER_FIREBASE_CONFIG_PATH?.trim() ?: 'ios/Runner/GoogleService-Info.plist')
+            env.ANDROID_FIREBASE_CONFIG_PATH = (env.ANDROID_FIREBASE_CONFIG_PATH?.trim() ?: 'android/app/google-services.json')
+
+            def bundleId = env.IOS_BUNDLE_IDENTIFIER?.trim()
+            if (!bundleId) {
+              bundleId = 'com.giatocphamdinh.familytree'
+            }
+            env.IOS_BUNDLE_IDENTIFIER = bundleId
+
+            def profileName = env.IOS_PROFILE_NAME?.trim()
+            if (!profileName) {
+              profileName = 'GiatocphamdinhAppEco'
+            }
+            env.IOS_PROFILE_NAME = profileName
+
+            def profileSpecifier = env.IOS_PROFILE_SPECIFIER?.trim()
+            if (!profileSpecifier) {
+              profileSpecifier = profileName
+            }
+            env.IOS_PROFILE_SPECIFIER = profileSpecifier
+
+            env.IOS_PROFILE_PATH = "ios/fastlane/profiles/${profileName}.mobileprovision"
+
+            def itcTeam = env.IOS_ITC_TEAM_ID?.trim()
+            if (!itcTeam) {
+              itcTeam = '128129522'
+            }
+            env.IOS_ITC_TEAM_ID = itcTeam
+
+            sh '''#!/bin/bash -l
+              set -euo pipefail
+              install -d ios/fastlane/certs ios/fastlane/profiles ios/fastlane/keys
+              install -m 0600 "$IOS_CERT_FILE" ios/fastlane/certs/Certificates.p12
+              install -m 0644 "$IOS_PROFILE_FILE" "$IOS_PROFILE_PATH"
+              install -d "$(dirname "$APPSTORE_KEY_PATH")"
+              install -m 0600 "$IOS_API_KEY_FILE" "$APPSTORE_KEY_PATH"
+              install -d "$(dirname "$FLUTTER_FIREBASE_CONFIG_PATH")"
+              install -m 0600 "$FIREBASE_IOS_CONFIG" "$FLUTTER_FIREBASE_CONFIG_PATH"
+              install -d "$(dirname "$ANDROID_FIREBASE_CONFIG_PATH")"
+              install -m 0644 "$FIREBASE_ANDROID_CONFIG" "$ANDROID_FIREBASE_CONFIG_PATH"
+            '''
+
+            sh '''#!/bin/bash -l
+              set -euo pipefail
+              # Create and set default keychain (use full path)
+              security delete-keychain "$KEYCHAIN_PATH" || true
+              security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+              security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+              security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+              security import ios/fastlane/certs/Certificates.p12 \
+                -k "$KEYCHAIN_PATH" -P "$IOS_CERT_PASSWORD" \
+                -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
+              security list-keychains -s "$KEYCHAIN_PATH"
+              security default-keychain -s "$KEYCHAIN_PATH"
+            '''
           }
-          sh '''#!/bin/bash -l
-            set -euo pipefail
-            # Create and set default keychain (use full path)
-            security delete-keychain "$KEYCHAIN_PATH" || true
-            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-            security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-            security import ios/fastlane/certs/Certificates.p12 \
-              -k "$KEYCHAIN_PATH" -P "$IOS_CERT_PASSWORD" \
-              -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
-            security list-keychains -s "$KEYCHAIN_PATH"
-            security default-keychain -s "$KEYCHAIN_PATH"
-          '''
         }
       }
     }
@@ -159,8 +197,13 @@ pipeline {
       steps {
         withEnv([
           'FASTLANE_SKIP_UPDATE_CHECK=true',
-          'FLUTTER_FIREBASE_CONFIG_PATH=ios/Runner/GoogleService-Info.plist',
-          'ANDROID_FIREBASE_CONFIG_PATH=android/app/google-services.json'
+          "FLUTTER_FIREBASE_CONFIG_PATH=${env.FLUTTER_FIREBASE_CONFIG_PATH}",
+          "ANDROID_FIREBASE_CONFIG_PATH=${env.ANDROID_FIREBASE_CONFIG_PATH}",
+          "IOS_PROFILE_PATH=${env.IOS_PROFILE_PATH}",
+          "IOS_PROFILE_NAME=${env.IOS_PROFILE_NAME}",
+          "IOS_PROFILE_SPECIFIER=${env.IOS_PROFILE_SPECIFIER}",
+          "IOS_BUNDLE_IDENTIFIER=${env.IOS_BUNDLE_IDENTIFIER}",
+          "IOS_ITC_TEAM_ID=${env.IOS_ITC_TEAM_ID}"
         ]) {
           sh '''#!/bin/bash -l
             set -eo pipefail

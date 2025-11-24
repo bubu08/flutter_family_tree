@@ -4,15 +4,15 @@ class AppSecrets {
   static const String _demoSecret = String.fromEnvironment('DEMO_SECRET', defaultValue: '');
 
   static void ensureLoaded() {
+    // Made optional to prevent app crashes when secret is not provided
+    // Log warning instead of throwing exception
     if (_demoSecret.isEmpty) {
-      throw StateError(
-        'DEMO_SECRET was not provided. Supply it via --dart-define or environment variable before running.',
-      );
+      // ignore: avoid_print
+      print('Warning: DEMO_SECRET was not provided. Some features may be limited.');
     }
   }
 
   static String get demoSecret {
-    ensureLoaded();
     return _demoSecret;
   }
 }

@@ -3,12 +3,18 @@ default_platform(:ios)
 platform :ios do
   desc "Build and upload to TestFlight"
   lane :beta do
+    bundle_id = ENV['IOS_BUNDLE_IDENTIFIER'] || "com.giatocphamdinh.familytree"
+    profile_name = ENV['IOS_PROFILE_NAME'] || "GiatocphamdinhAppEco"
+    profile_specifier = ENV['IOS_PROFILE_SPECIFIER'] || profile_name
+    dev_team = ENV['IOS_DEVELOPMENT_TEAM'] || "DLX7252NAD"
+    code_sign_identity = ENV['IOS_CODE_SIGN_IDENTITY'] || "Apple Distribution"
+
     # Set signing
     update_code_signing_settings(
       path: "Runner.xcodeproj", # hoặc .xcworkspace nếu có
       use_automatic_signing: false,
-      team_id: "DLX7252NAD",
-      bundle_identifier: "com.giatocphamdinh.familytree"
+      team_id: dev_team,
+      bundle_identifier: bundle_id
     )
 
     # Import cert
@@ -20,9 +26,8 @@ platform :ios do
     )
 
     # Install provisioning profile
-    install_provisioning_profile(
-      path: ENV.fetch("IOS_PROFILE_PATH", "fastlane/profiles/GiatocphamdinhAppEco.mobileprovision")
-    )
+    profile_path = ENV['IOS_PROFILE_PATH'] || "fastlane/profiles/#{profile_name}.mobileprovision"
+    install_provisioning_profile(path: profile_path)
     sh("flutter --version")
     sh("flutter clean")
     sh("flutter pub get")
@@ -36,10 +41,10 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          "com.giatocphamdinh.familytree" => "GiatocphamdinhAppEco"
+          bundle_id => profile_specifier
         }
       },
-      xcargs: "CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=DLX7252NAD CODE_SIGN_IDENTITY='Apple Distribution' PROVISIONING_PROFILE_SPECIFIER='GiatocphamdinhAppEco' IPHONEOS_DEPLOYMENT_TARGET=15.0"
+      xcargs: "CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=#{dev_team} CODE_SIGN_IDENTITY='#{code_sign_identity}' PROVISIONING_PROFILE_SPECIFIER='#{profile_specifier}' PRODUCT_BUNDLE_IDENTIFIER='#{bundle_id}' IPHONEOS_DEPLOYMENT_TARGET=15.0"
     )
 
     # Upload using API key
