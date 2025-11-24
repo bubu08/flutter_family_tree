@@ -50,7 +50,7 @@ pipeline {
           set +u
           source /Library/Jenkins/.rvm/scripts/rvm
           rvm use 3.2.4@ios --create
-          set -u
+          # Don't set -u here to avoid PROMPT_COMMAND errors
 
           # Respect Gemfile.lock bundler if present; otherwise install/update bundler
           BUNDLER_VERSION="$(awk '/^BUNDLED WITH$/{getline; gsub(/^[\\t ]+/,\"\"); print; exit}' Gemfile.lock || true)"
