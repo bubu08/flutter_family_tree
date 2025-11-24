@@ -74,7 +74,7 @@ pipeline {
           set +u
           source /Library/Jenkins/.rvm/scripts/rvm
           rvm use 3.2.4@ios
-          set -u
+          # Don't set -u here to avoid PROMPT_COMMAND errors
 
           which ruby && ruby -v
           which bundle && bundle --version
@@ -207,12 +207,12 @@ pipeline {
         ]) {
           sh '''#!/bin/bash -l
             set -eo pipefail
-            export FLUTTER_SDK="/Library/Jenkins/flutter"
+            export FLUTTER_SDK="/usr/local/share/flutter"
             export PATH="$FLUTTER_SDK/bin:$PATH"
             set +u
             source /Library/Jenkins/.rvm/scripts/rvm
             rvm use 3.2.4@ios
-            set -u
+            # Don't set -u here to avoid PROMPT_COMMAND errors
             bundle exec fastlane ios beta
           '''
         }
