@@ -19,7 +19,7 @@ pipeline {
       steps {
         sh '''#!/bin/bash -l
           set -eo pipefail
-          export FLUTTER_SDK="/Library/Jenkins/flutter"
+          export FLUTTER_SDK="/usr/local/share/flutter"
           export PATH="$FLUTTER_SDK/bin:$PATH"
 
           # the SDK is a git repo; mark it safe for the jenkins user
@@ -82,7 +82,7 @@ pipeline {
           # show gem fastlane and flutter
           bundle exec fastlane --version || true
 
-          export FLUTTER_SDK="/Library/Jenkins/flutter"
+          export FLUTTER_SDK="/usr/local/share/flutter"
           export PATH="$FLUTTER_SDK/bin:$PATH"
           which flutter && flutter --version
         '''
