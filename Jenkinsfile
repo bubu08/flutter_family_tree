@@ -114,18 +114,15 @@ pipeline {
             file(credentialsId: 'ios-cert-p12', variable: 'IOS_CERT_FILE'),
             string(credentialsId: 'ios-cert-password', variable: 'IOS_CERT_PASSWORD_SECRET'),
             file(credentialsId: profileCredentialId, variable: 'IOS_PROFILE_FILE'),
-            file(credentialsId: 'appstore-ios-api-key-file', variable: 'IOS_API_KEY_FILE'),
+            file(credentialsId: 'ios-api-key', variable: 'IOS_API_KEY_FILE'),
             file(credentialsId: 'firebase-ios-config', variable: 'FIREBASE_IOS_CONFIG'),
             file(credentialsId: 'firebase-android-config', variable: 'FIREBASE_ANDROID_CONFIG'),
-            string(credentialsId: 'ios-keychain-password', variable: 'IOS_KEYCHAIN_PASSWORD_SECRET'),
             string(credentialsId: 'appstore-key-id', variable: 'APPSTORE_KEY_ID_SECRET'),
             string(credentialsId: 'appstore-issuer-id', variable: 'APPSTORE_ISSUER_ID_SECRET')
           ]) {
-            def kcSecret = IOS_KEYCHAIN_PASSWORD_SECRET?.trim()
-            if (!kcSecret) {
-              kcSecret = java.util.UUID.randomUUID().toString()
-              echo 'ios-keychain-password credential was blank; generated a temporary password for this build.'
-            }
+            // Generate temporary keychain password since ios-keychain-password credential doesn't exist
+            def kcSecret = java.util.UUID.randomUUID().toString()
+            echo 'Generated temporary keychain password for this build.'
 
             env.IOS_CERT_PASSWORD = IOS_CERT_PASSWORD_SECRET
             env.KEYCHAIN_PASSWORD = kcSecret
