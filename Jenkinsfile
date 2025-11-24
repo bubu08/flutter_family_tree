@@ -212,6 +212,7 @@ pipeline {
             source /Library/Jenkins/.rvm/scripts/rvm
             rvm use 3.2.4@ios
             # Don't set -u here to avoid PROMPT_COMMAND errors
+            cd ios
             bundle exec fastlane ios beta
           '''
         }
