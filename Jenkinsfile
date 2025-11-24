@@ -151,7 +151,7 @@ pipeline {
             }
             env.IOS_PROFILE_SPECIFIER = profileSpecifier
 
-            env.IOS_PROFILE_PATH = "ios/fastlane/profiles/${profileName}.mobileprovision"
+            env.IOS_PROFILE_PATH = "fastlane/profiles/${profileName}.mobileprovision"
 
             def itcTeam = env.IOS_ITC_TEAM_ID?.trim()
             if (!itcTeam) {
