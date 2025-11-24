@@ -160,7 +160,8 @@ pipeline {
             env.IOS_ITC_TEAM_ID = itcTeam
 
             sh '''#!/bin/bash -l
-              set -euo pipefail
+              set -eo pipefail
+              # Don't use -u to avoid PROMPT_COMMAND errors in login shells
               install -d ios/fastlane/certs ios/fastlane/profiles ios/fastlane/keys
               install -m 0600 "$IOS_CERT_FILE" ios/fastlane/certs/Certificates.p12
               install -m 0644 "$IOS_PROFILE_FILE" "$IOS_PROFILE_PATH"
@@ -173,7 +174,8 @@ pipeline {
             '''
 
             sh '''#!/bin/bash -l
-              set -euo pipefail
+              set -eo pipefail
+              # Don't use -u to avoid PROMPT_COMMAND errors in login shells
               # Create and set default keychain (use full path)
               security delete-keychain "$KEYCHAIN_PATH" || true
               security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
